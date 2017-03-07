@@ -59,6 +59,16 @@ public class Robot extends SampleRobot
     static final Scalar BLUE    = new Scalar(255,   0,   0);
     static final Scalar MAGENTA = new Scalar(255,   0, 255);
     static final Scalar WHITE   = new Scalar(255, 255, 255);
+
+    // List of installed hardware on the robot.
+    
+    final	boolean	installedDrive_			= false;
+    final	boolean	installedGyro_			= false;
+    final	boolean	installedJoystick_		= false;
+    final	boolean	installedFrontCamera_	= true;
+    final	boolean	installedRearCamera_	= false;
+    final	boolean	installedClimb_			= false;
+    final	boolean	installedGearDrop_		= false;
     
     double angleSetpoint = 0.0;
     
@@ -88,8 +98,6 @@ public class Robot extends SampleRobot
     CANTalon			rightFront_;
     CANTalon			rightRear_;
     
-    boolean			climbInstalled_ = false;
-    
     CANTalon			climbLeft_;
     CANTalon			climbRight_;
 
@@ -113,7 +121,8 @@ public class Robot extends SampleRobot
      * Main robot constructor - this is called before RobotInit().
      */
     
-    public Robot()
+    @SuppressWarnings("unused")
+	public Robot()
     {
     	System.out.println("-> Robot()");
     	
@@ -122,68 +131,88 @@ public class Robot extends SampleRobot
     	cameraSwitchButton_ = false;
     	
     	// Motor controllers for the robot movement.
-    	
-    	leftFront_  = new CANTalon(4);
-    	leftRear_   = new CANTalon(8);
-    	rightFront_ = new CANTalon(1);
-    	rightRear_  = new CANTalon(2);
-    	
-    	// Not sure if these need setting, but lets do it anyway.
-    	
-    	leftFront_.configMaxOutputVoltage(12.0);
-    	leftFront_.configNominalOutputVoltage(12.0, 12.0);
-    	leftFront_.configPeakOutputVoltage(12.0,  12.0);
 
-    	leftRear_.configMaxOutputVoltage(12.0);
-    	leftRear_.configNominalOutputVoltage(12.0, 12.0);
-    	leftRear_.configPeakOutputVoltage(12.0,  12.0);
+    	if(installedDrive_ == true)
+    	{
+        	leftFront_  = new CANTalon(4);
+        	leftRear_   = new CANTalon(8);
+        	rightFront_ = new CANTalon(1);
+        	rightRear_  = new CANTalon(2);
     	
-    	rightFront_.configMaxOutputVoltage(12.0);
-    	rightFront_.configNominalOutputVoltage(12.0, 12.0);
-    	rightFront_.configPeakOutputVoltage(12.0,  12.0);
+        	// Not sure if these need setting, but lets do it anyway.
+        	
+        	leftFront_.configMaxOutputVoltage(12.0);
+        	leftFront_.configNominalOutputVoltage(12.0, 12.0);
+        	leftFront_.configPeakOutputVoltage(12.0,  12.0);
 
-    	rightRear_.configMaxOutputVoltage(12.0);
-    	rightRear_.configNominalOutputVoltage(12.0, 12.0);
-    	rightRear_.configPeakOutputVoltage(12.0,  12.0);
+        	leftRear_.configMaxOutputVoltage(12.0);
+        	leftRear_.configNominalOutputVoltage(12.0, 12.0);
+        	leftRear_.configPeakOutputVoltage(12.0,  12.0);
+        	
+        	rightFront_.configMaxOutputVoltage(12.0);
+        	rightFront_.configNominalOutputVoltage(12.0, 12.0);
+        	rightFront_.configPeakOutputVoltage(12.0,  12.0);
 
-    	movement_ = new Movement(leftFront_, rightRear_);
+        	rightRear_.configMaxOutputVoltage(12.0);
+        	rightRear_.configNominalOutputVoltage(12.0, 12.0);
+        	rightRear_.configPeakOutputVoltage(12.0,  12.0);
+
+        	movement_ = new Movement(leftFront_, rightRear_);
+        
+        	drive_ = new RamsRobotDrive(leftRear_ ,leftFront_, rightRear_, rightFront_);
+            
+            drive_.setExpiration(0.1f);
+            
+            speedLimit_ = 0.50;			// Max of 50% speed for movement.
+    	}
     	
-    	if(climbInstalled_ == true)
+    	if(installedClimb_ == true)
     	{
         	climbLeft_  = new CANTalon(16);
         	climbRight_ = new CANTalon(17);
+
+        	climbLeft_.configMaxOutputVoltage(12.0);
+        	climbLeft_.configNominalOutputVoltage(12.0, 12.0);
+        	climbLeft_.configPeakOutputVoltage(12.0,  12.0);
+
+        	climbRight_.configMaxOutputVoltage(12.0);
+        	climbRight_.configNominalOutputVoltage(12.0, 12.0);
+        	climbRight_.configPeakOutputVoltage(12.0,  12.0);
+
+        	climbSpeed_		= 0.0;
+    		climbRate_		= 0.0;
+    		climbMaxSpeed_	= 0.0;
+    		
+        	climbState_ = CLIMB_START;
     	}
-    	
-		climbSpeed_		= 0.0;
-		climbRate_		= 0.0;
-		climbMaxSpeed_	= 0.0;
-		
-    	climbState_ = CLIMB_START;
-    	
-    	drive_ = new RamsRobotDrive(leftRear_ ,leftFront_, rightRear_, rightFront_);
-        
-        drive_.setExpiration(0.1f);
-        
-        speedLimit_ = 0.5;			// Max of 50% speed for movement.
 
         // Variables for the gyro.
-        
-        gyro_ = new AnalogGyro(0);
-        
-        gyro_.initGyro();
-        gyro_.reset();
-        
-        // Alocate a new joystick for the robot control.
-        
-        joystick_ = new Joystick(0);
+
+    	if(installedGyro_ == true)
+    	{
+            gyro_ = new AnalogGyro(0);
+            
+            gyro_.initGyro();
+            gyro_.reset();
+    	}
+    	
+        // Allocate a new joystick for the robot control.
+
+    	if(installedJoystick_ == true)
+    	{
+    		joystick_ = new Joystick(0);
+    	}
 
         // Variables required to handle dropping the gear.
-        
-        drop_ = new Solenoid(0);
-        
-        drop_.set(false);
-        
-        dropGearButton_ = false;
+
+        if(installedGearDrop_ == true)
+        {
+            drop_ = new Solenoid(0);
+            
+            drop_.set(false);
+            
+            dropGearButton_ = false;
+        }
         
     	System.out.println("<- Robot()");
     }
@@ -196,7 +225,8 @@ public class Robot extends SampleRobot
      * @see edu.wpi.first.wpilibj.SampleRobot#robotInit()
      */
     
-    public void robotInit()
+    @SuppressWarnings("unused")
+	public void robotInit()
     {
     	System.out.println("-> robotInit()");
         
@@ -207,41 +237,47 @@ public class Robot extends SampleRobot
         	cameraInUse_ = FRONT_CAMERA;
 
         	// Front camera is used for dropping the gear off and will be used by the OpenCV code.
-        	
-        	usbFrontCamera_ = CameraServer.getInstance().startAutomaticCapture(0);
+    
+        	if(installedFrontCamera_ == true)
+        	{
+            	usbFrontCamera_ = CameraServer.getInstance().startAutomaticCapture(0);
 
-            usbFrontCamera_.setResolution(320, 240);
-            usbFrontCamera_.setFPS(15);
+                usbFrontCamera_.setResolution(320, 240);
+                usbFrontCamera_.setFPS(15);
 
-            /*
-            
-            // Grab the JSON file and save into a table for this.
-
-            VideoProperty camera0[] = usbFrontCamera_.enumerateProperties();
-
-            for(int i = camera0.length(); ++i)
-            {
+                cvFrontSink_ = CameraServer.getInstance().getVideo(usbFrontCamera_);
             	
-            }
-            */
+        		cvFrontSink_.setEnabled(true);
+            	cvFrontSink_.setSource(usbFrontCamera_);
+            	
+                /*
+                
+                // Grab the JSON file and save into a table for this.
+
+                VideoProperty camera0[] = usbFrontCamera_.enumerateProperties();
+
+                for(int i = camera0.length(); ++i)
+                {
+                	
+                }
+                */
+        	}
             
             // The rear camera is only used when we are looking for the rope.
 
-        	usbRearCamera_ = CameraServer.getInstance().startAutomaticCapture(1);
+        	if(installedRearCamera_ == true)
+        	{
+            	usbRearCamera_ = CameraServer.getInstance().startAutomaticCapture(1);
 
-            usbRearCamera_.setResolution(320, 240);
-            usbRearCamera_.setFPS(15);
+                usbRearCamera_.setResolution(320, 240);
+                usbRearCamera_.setFPS(15);
 
-        	cvFrontSink_ = CameraServer.getInstance().getVideo(usbFrontCamera_);
+            	cvRearSink_ = CameraServer.getInstance().getVideo(usbRearCamera_);
+
+        		cvRearSink_.setEnabled(false);
+            	cvRearSink_.setSource(usbRearCamera_);
+        	}
         	
-    		cvFrontSink_.setEnabled(true);
-        	cvFrontSink_.setSource(usbFrontCamera_);
-        	
-        	cvRearSink_ = CameraServer.getInstance().getVideo(usbRearCamera_);
-
-    		cvRearSink_.setEnabled(false);
-        	cvRearSink_.setSource(usbRearCamera_);
-
         	outputStream_ = CameraServer.getInstance().putVideo("Robot Camera", 320, 240);
 
         	// Create the Mat data required by the capture code.
@@ -282,20 +318,34 @@ public class Robot extends SampleRobot
             		{
         				case FRONT_CAMERA :
         				{
-        					cameraInUse_ = FRONT_CAMERA;
+        					if(installedFrontCamera_ == true)
+        					{
+        						cameraInUse_ = FRONT_CAMERA;
 
-                			cvFrontSink_.setEnabled(true);
-                			cvRearSink_.setEnabled(false);
+        						cvFrontSink_.setEnabled(true);
+        						cvRearSink_.setEnabled(false);
+        					}
+        					else
+        					{
+        						System.out.println("Front camera not installed.");
+        					}
 
                 			break;
         				}
         			
             			case REAR_CAMERA :
             			{
-        					cameraInUse_ = REAR_CAMERA;
+            				if(installedRearCamera_ == true)
+            				{
+            					cameraInUse_ = REAR_CAMERA;
 
-                    		cvFrontSink_.setEnabled(false);
-                    		cvRearSink_.setEnabled(true);
+                        		cvFrontSink_.setEnabled(false);
+                        		cvRearSink_.setEnabled(true);
+            				}
+        					else
+        					{
+        						System.out.println("Rear camera not installed.");
+        					}
 
                     		break;
             			}
@@ -313,58 +363,64 @@ public class Robot extends SampleRobot
             	{
             		case FRONT_CAMERA :
             		{
-                		cvFrontSink_.grabFrameNoTimeout(original);
+            			if(installedFrontCamera_ == true)
+            			{
+                    		cvFrontSink_.grabFrameNoTimeout(original);
 
-                		// Convert the grabbed image to HSV format so we can work with it.
+                    		// Convert the grabbed image to HSV format so we can work with it.
 
-                		Imgproc.cvtColor(original, hsv, Imgproc.COLOR_BGR2HSV);
+                    		Imgproc.cvtColor(original, hsv, Imgproc.COLOR_BGR2HSV);
 
-                		// Grab an black and white image with white as the selected area.
+                    		// Grab an black and white image with white as the selected area.
 
-                		Core.inRange(hsv, lowHSV, highHSV, image);
+                    		Core.inRange(hsv, lowHSV, highHSV, image);
 
-            			hsv.release();
+                			hsv.release();
 
-                		// Clear the previous contours and grab the new ones.
-                		
-                		contours.clear();
-                		
-                		Imgproc.findContours(image, contours, temp,
-                							 Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+                    		// Clear the previous contours and grab the new ones.
+                    		
+                    		contours.clear();
+                    		
+                    		Imgproc.findContours(image, contours, temp,
+                    							 Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
-            			image.release();
-                        temp.release();
+                			image.release();
+                            temp.release();
 
-                		// Grab the co-ords of the corners of the box(es) from the contour list.
+                    		// Grab the co-ords of the corners of the box(es) from the contour list.
 
-                        // Send the information to the main code.
-                        
-                		// Show the found contours for the user.
-                		
-                		for(int i = 0; i < contours.size(); ++i)
-        				{
-                			Imgproc.drawContours(original, contours, i, WHITE);
-        				}
+                            // Send the information to the main code.
+                            
+                    		// Show the found contours for the user.
+                    		
+                    		for(int i = 0; i < contours.size(); ++i)
+            				{
+                    			Imgproc.drawContours(original, contours, i, WHITE);
+            				}
 
-                		// Display the cross-hair in the centre of the screen.
-                		
-                		Imgproc.line(original, crossH0, crossH1, MAGENTA);
-                		Imgproc.line(original, crossV0, crossV1, MAGENTA);
+                    		// Display the cross-hair in the centre of the screen.
+                    		
+                    		Imgproc.line(original, crossH0, crossH1, MAGENTA);
+                    		Imgproc.line(original, crossV0, crossV1, MAGENTA);
 
-                        outputStream_.putFrame(original);
+                            outputStream_.putFrame(original);
 
-                		original.release();
-
+                    		original.release();
+            			}
+            			
                 		break;
             		}
             		
             		case REAR_CAMERA :
             		{
-                		cvRearSink_.grabFrameNoTimeout(original);
+            			if(installedRearCamera_ == true)
+            			{
+                    		cvRearSink_.grabFrameNoTimeout(original);
 
-                        outputStream_.putFrame(original);
+                            outputStream_.putFrame(original);
 
-                		original.release();
+                    		original.release();
+            			}
 
                 		break;
             		}
@@ -531,36 +587,40 @@ public class Robot extends SampleRobot
      * at the time. 
      */
     
-    private void moveRobot()
+    @SuppressWarnings("unused")
+	private void moveRobot()
     {
 //      double turningValue;
         
 //      gyro.setSensitivity(voltsPerDegreePerSecond); //calibrates gyro values to equal degrees
 
 //    	turningValue =  (angleSetpoint - gyro.getAngle()) * pGain;
-    	
-    	switch(cameraInUse_)
+
+    	if(installedDrive_ == true)
     	{
-    		case FRONT_CAMERA :
-    		{
-            	drive_.arcadeDrive(-joystick_.getY() * speedLimit_,
-            					   -joystick_.getX() * speedLimit_, true);
-            	
-    			break;
-    		}
-    		
-    		case REAR_CAMERA :
-    		{
-            	drive_.arcadeDrive(+joystick_.getY() * speedLimit_,
-								   -joystick_.getX() * speedLimit_, true);
-            	
-    			break;
-    		}
-    		
-    		default :
-    		{
-    			break;
-    		}
+        	switch(cameraInUse_)
+        	{
+        		case FRONT_CAMERA :
+        		{
+                	drive_.arcadeDrive(-joystick_.getY() * speedLimit_,
+                					   -joystick_.getX() * speedLimit_, true);
+                	
+        			break;
+        		}
+        		
+        		case REAR_CAMERA :
+        		{
+                	drive_.arcadeDrive(+joystick_.getY() * speedLimit_,
+    								   -joystick_.getX() * speedLimit_, true);
+                	
+        			break;
+        		}
+        		
+        		default :
+        		{
+        			break;
+        		}
+        	}
     	}
     }
     
@@ -569,23 +629,33 @@ public class Robot extends SampleRobot
 	 * close the gear/cog holder.
 	 */
     
-    private void dropGear()
+    @SuppressWarnings("unused")
+	private void dropGear()
     {
-        if(joystick_.getRawButton(BUTTON_A) == true)
-        {
-        	dropGearButton_ = true;
-        	
-        	drop_.set(true);
-        }
-        else
-        {
-    		if(dropGearButton_ == true)
-        	{
-        		dropGearButton_ = false;
-        		
-        		drop_.set(false);
-        	}
-        }
+    	if(installedJoystick_ == true)
+    	{
+            if(joystick_.getRawButton(BUTTON_A) == true)
+            {
+            	dropGearButton_ = true;
+
+            	if(installedGearDrop_ == true)
+            	{
+            		drop_.set(true);
+            	}
+            }
+            else
+            {
+        		if(dropGearButton_ == true)
+            	{
+            		dropGearButton_ = false;
+            		
+                	if(installedGearDrop_ == true)
+                	{
+                		drop_.set(false);
+                	}
+            	}
+            }
+    	}
     }
 
     /*
@@ -593,31 +663,41 @@ public class Robot extends SampleRobot
      * switches the controls on the robot.
      */
     
-    private void switchCamera()
+    @SuppressWarnings("unused")
+	private void switchCamera()
     {
-        if(joystick_.getRawButton(BUTTON_START) == true)
-        {
-        	if(cameraSwitchButton_ == false)
-        	{
-        		if(cameraInUse_ == FRONT_CAMERA)
-        		{
-                	cameraControl_.push((Integer) REAR_CAMERA);
-        		}
-        		else
-        		{
-                	cameraControl_.push((Integer) FRONT_CAMERA);
-        		}
-        		
-        		cameraSwitchButton_ = true;
-        	}
-        }
-        else
-        {
-        	if(cameraSwitchButton_ == true)
-        	{
-        		cameraSwitchButton_ = false;
-        	}
-        }
+    	if(installedJoystick_ == true)
+    	{
+            if(joystick_.getRawButton(BUTTON_START) == true)
+            {
+            	if(cameraSwitchButton_ == false)
+            	{
+            		if(cameraInUse_ == FRONT_CAMERA)
+            		{
+            			if(installedRearCamera_ == true)
+            			{
+            				cameraControl_.push((Integer) REAR_CAMERA);
+            			}
+            		}
+            		else
+            		{
+            			if(installedFrontCamera_ == true)
+            			{
+            				cameraControl_.push((Integer) FRONT_CAMERA);
+            			}
+            		}
+            		
+            		cameraSwitchButton_ = true;
+            	}
+            }
+            else
+            {
+            	if(cameraSwitchButton_ == true)
+            	{
+            		cameraSwitchButton_ = false;
+            	}
+            }
+    	}
     }
 
     /*
@@ -626,9 +706,10 @@ public class Robot extends SampleRobot
 
     private int counter_ = 0;
     
-    private void climbRope()
+    @SuppressWarnings("unused")
+	private void climbRope()
     {
-    	if((climbInstalled_ == true)
+    	if((installedClimb_ == true)
     	&& (cameraInUse_ == REAR_CAMERA))
     	{
     		if((++counter_ % 10) == 0)
