@@ -30,17 +30,25 @@ public class Vision
 
 	Scalar	lowHSV_;
 	Scalar	highHSV_;
+	
+    Stack<Mat>	visionControl_;
+
+	Robot	robot_;
+	
+	Thread	visionThread_;
 
 	/*
 	 * Constructor.
 	 */
 	
-	Vision()
+	Vision(Robot _robot)
 	{
-		hsv_	 = new Mat();
-		image_ 	 = new Mat();
+		robot_	= _robot;
+		
+		hsv_	= new Mat();
+		image_ 	= new Mat();
 
-		temp_ 	 = new Mat();
+		temp_ 	= new Mat();
 		
 		// Allocate the storage for the generated contours.
 
@@ -51,22 +59,62 @@ public class Vision
 		lowHSV_  = new Scalar(55, 100, 100);
 		highHSV_ = new Scalar(95, 255, 255);
 
+    	visionControl_ = new Stack<Mat>();
+
 		// Thread to process the image.
-		
-        new Thread(() ->
+
+        visionThread_ = new Thread(() ->
         {
-        }).start();
+            while(!Thread.interrupted())
+        	{
+            	if(visionControl_.empty() == false)
+            	{
+            		// Process the image.
+            		
+            		process(visionControl_.pop());
+
+            		// Request a new image to process.
+            		
+            		robot_.request(Robot.FRONT_IMAGE);
+            	}
+        	}
+        });
+        
+		visionThread_.setDaemon(true);
+		visionThread_.start();
+
+		// Request a new image to start the processing.
+		
+		robot_.request(Robot.FRONT_IMAGE);
+	}
+	
+	/*
+	 * Receive the image to be processed.
+	 */
+	
+	public void give(Mat _image)
+	{
+		visionControl_.push(_image);
+	}
+	
+	/*
+	 * Show the last grabbed contours on the screen.
+	 */
+	
+	public void show(Mat _image)
+	{
+		
 	}
 
 	/*
 	 * Process the images and grab the co-ords of the two boxes that should be on screen.
 	 */
 	
-	void Process(Mat _original)
+	void process(Mat _image)
 	{
 		// Convert the grabbed image to HSV format so we can work with it.
 
-		Imgproc.cvtColor(_original, hsv_,
+		Imgproc.cvtColor(_image, hsv_,
 						 Imgproc.COLOR_BGR2HSV);
 
 		// Grab an black and white image with white as the selected area.
@@ -88,7 +136,6 @@ public class Vision
 
 		// Grab the co-ords of the corners of the box(es) from the contour list.
 
-        // Send the information to the main code.
-		
+        _image.release();
 	}
 }

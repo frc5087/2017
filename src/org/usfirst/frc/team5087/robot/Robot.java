@@ -76,6 +76,10 @@ public class Robot extends SampleRobot
     
     final double voltsPerDegreePerSecond = .0128;
     
+    Vision				vision_;
+    
+	Thread 				visionThread_;
+
     Stack<Integer>		cameraControl_;
     
     int					cameraInUse_;
@@ -227,7 +231,7 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> robotInit()");
         
-        new Thread(() ->
+        visionThread_ = new Thread(() ->
         {
         	System.out.println("-> Thread()");
 
@@ -258,6 +262,8 @@ public class Robot extends SampleRobot
                 	
                 }
                 */
+
+            	vision_ = new Vision(this);
         	}
             
             // The rear camera is only used when we are looking for the rope.
@@ -280,6 +286,8 @@ public class Robot extends SampleRobot
         	// Create the Mat data required by the capture code.
         	
 			Mat	original = new Mat();
+			
+			Mat copyimage = new Mat();
 
 			// Points for the cross-hair lines.
 			
@@ -293,6 +301,52 @@ public class Robot extends SampleRobot
         	
             while(!Thread.interrupted())
             {
+            	// Display the correct video.
+
+        		original.release();	// TODO should we do this?
+
+            	switch(cameraInUse_)
+            	{
+            		case FRONT_CAMERA :
+            		{
+            			if(installedFrontCamera_ == true)
+            			{
+                    		cvFrontSink_.grabFrameNoTimeout(original);
+                            
+                    		// Show the found contours for the user.
+                    		
+            			}
+            			
+                		break;
+            		}
+            		
+            		case REAR_CAMERA :
+            		{
+            			if(installedRearCamera_ == true)
+            			{
+                    		cvRearSink_.grabFrameNoTimeout(original);
+            			}
+
+                		break;
+            		}
+            		
+            		default :
+            		{
+            			System.out.println(cameraInUse_ + " - invalid camera id.");
+            			
+            			break;
+            		}
+            	}
+            	
+            	vision_.show(original);
+            	
+        		// Display the cross-hair in the centre of the screen.
+        		
+        		Imgproc.line(original, crossH0, crossH1, MAGENTA);
+        		Imgproc.line(original, crossV0, crossV1, MAGENTA);
+
+                outputStream_.putFrame(original);
+                
             	// Switch cameras if requested by the main application.
             	
             	if(cameraControl_.empty() == false)
@@ -331,7 +385,9 @@ public class Robot extends SampleRobot
             			{
             				if(installedFrontCamera_ == true)
             				{
-            					// Send the last image from the front camera to the vision processor.
+            					original.copyTo(copyimage);
+            					
+            					vision_.give(copyimage);
             				}
             				
             				break;
@@ -346,57 +402,17 @@ public class Robot extends SampleRobot
             		}
             	}
             	
-            	// Display the correct video.
-
-        		original.release();	// TODO should we do this?
-
-            	switch(cameraInUse_)
-            	{
-            		case FRONT_CAMERA :
-            		{
-            			if(installedFrontCamera_ == true)
-            			{
-                    		cvFrontSink_.grabFrameNoTimeout(original);
-                            
-                    		// Show the found contours for the user.
-                    		
-            			}
-            			
-                		break;
-            		}
-            		
-            		case REAR_CAMERA :
-            		{
-            			if(installedRearCamera_ == true)
-            			{
-                    		cvRearSink_.grabFrameNoTimeout(original);
-            			}
-
-                		break;
-            		}
-            		
-            		default :
-            		{
-            			System.out.println(cameraInUse_ + " - invalid camera id.");
-            			
-            			break;
-            		}
-            	}
-            	
-        		// Display the cross-hair in the centre of the screen.
-        		
-        		Imgproc.line(original, crossH0, crossH1, MAGENTA);
-        		Imgproc.line(original, crossV0, crossV1, MAGENTA);
-
-                outputStream_.putFrame(original);
             }
 
             System.out.println("Stopped.");
             
         	System.out.println("<- Thread()");
 
-        }).start();
+        });
         
+		visionThread_.setDaemon(true);
+		visionThread_.start();
+
     	System.out.println("<- robotInit()");
     }
 
@@ -467,6 +483,15 @@ public class Robot extends SampleRobot
     	System.out.println("<- test()");
     }
 
+    /*
+     * Send a request to the camera thread.
+     */
+    
+    public void request(int _request)
+    {
+		cameraControl_.push((Integer) _request);
+    }
+    
     /*
      * Handle the movement of the robot and adjust depending on the camera being used
      * at the time. 
@@ -561,14 +586,14 @@ public class Robot extends SampleRobot
             		{
             			if(installedRearCamera_ == true)
             			{
-            				cameraControl_.push((Integer) REAR_CAMERA);
+            				request(REAR_CAMERA);
             			}
             		}
             		else
             		{
             			if(installedFrontCamera_ == true)
             			{
-            				cameraControl_.push((Integer) FRONT_CAMERA);
+            				request(FRONT_CAMERA);
             			}
             		}
             		
