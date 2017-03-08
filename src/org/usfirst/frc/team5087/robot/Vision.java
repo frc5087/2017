@@ -77,6 +77,18 @@ public class Vision
             		
             		robot_.request(Robot.FRONT_IMAGE);
             	}
+            	else
+            	{
+            		try
+            		{
+						Thread.sleep(50);
+					}
+            		
+            		catch (InterruptedException e)
+            		{
+						e.printStackTrace();
+					}
+            	}
         	}
         });
         

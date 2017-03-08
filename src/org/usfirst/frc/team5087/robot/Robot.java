@@ -61,6 +61,7 @@ public class Robot extends SampleRobot
     
     final	boolean	installedDrive_			= false;
     final	boolean	installedGyro_			= false;
+    final	boolean	installedSpokeSensor_	= true;
     final	boolean	installedJoystick_		= false;
     final	boolean	installedFrontCamera_	= true;
     final	boolean	installedRearCamera_	= false;
@@ -77,6 +78,8 @@ public class Robot extends SampleRobot
     final double voltsPerDegreePerSecond = .0128;
     
     Vision				vision_;
+    
+    SpokeSensor			spokesensor_;
     
 	Thread 				visionThread_;
 
@@ -185,6 +188,11 @@ public class Robot extends SampleRobot
     		climbMaxSpeed_	= 0.0;
     		
         	climbState_ = CLIMB_START;
+    	}
+    	
+    	if(installedSpokeSensor_ == true)
+    	{
+    		spokesensor_ = new SpokeSensor();
     	}
 
         // Variables for the gyro.
@@ -301,6 +309,11 @@ public class Robot extends SampleRobot
         	
             while(!Thread.interrupted())
             {
+            	if(installedSpokeSensor_ == true)
+            	{
+            		System.out.println("Spoke:" + spokesensor_.position());
+            	}
+            	
             	// Display the correct video.
 
         		original.release();	// TODO should we do this?
