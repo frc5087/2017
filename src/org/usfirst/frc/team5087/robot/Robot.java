@@ -47,6 +47,7 @@ public class Robot extends SampleRobot
     
     static final int FRONT_CAMERA	= 0;
     static final int REAR_CAMERA	= 1;
+    static final int FRONT_IMAGE	= 2;
 
     static final int CLIMB_START	= 0;
     static final int CLIMB_ATTACH	= 1;
@@ -282,19 +283,7 @@ public class Robot extends SampleRobot
 
         	// Create the Mat data required by the capture code.
         	
-			Mat		original = new Mat();
-
-			Mat		hsv		 = new Mat();
-			Mat 	image 	 = new Mat();
-
-			Mat 	temp 	 = new Mat();
-
-			List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-
-			// Create the low and high HSV values to generate the contours.
-			
-			Scalar	lowHSV  = new Scalar(55, 100, 100);
-			Scalar	highHSV = new Scalar(95, 255, 255);
+			Mat	original = new Mat();
 
 			// Points for the cross-hair lines.
 			
@@ -325,10 +314,6 @@ public class Robot extends SampleRobot
         						cvFrontSink_.setEnabled(true);
         						cvRearSink_.setEnabled(false);
         					}
-        					else
-        					{
-        						System.out.println("Front camera not installed.");
-        					}
 
                 			break;
         				}
@@ -342,12 +327,18 @@ public class Robot extends SampleRobot
                         		cvFrontSink_.setEnabled(false);
                         		cvRearSink_.setEnabled(true);
             				}
-        					else
-        					{
-        						System.out.println("Rear camera not installed.");
-        					}
 
                     		break;
+            			}
+            			
+            			case FRONT_IMAGE :
+            			{
+            				if(installedFrontCamera_ == true)
+            				{
+            					// Send the last image from the front camera to the vision processor.
+            				}
+            				
+            				break;
             			}
             			
             			default :
@@ -359,6 +350,10 @@ public class Robot extends SampleRobot
             		}
             	}
             	
+            	// Display the correct video.
+
+        		original.release();	// TODO should we do this?
+
             	switch(cameraInUse_)
             	{
             		case FRONT_CAMERA :
@@ -366,46 +361,9 @@ public class Robot extends SampleRobot
             			if(installedFrontCamera_ == true)
             			{
                     		cvFrontSink_.grabFrameNoTimeout(original);
-
-                    		// Convert the grabbed image to HSV format so we can work with it.
-
-                    		Imgproc.cvtColor(original, hsv, Imgproc.COLOR_BGR2HSV);
-
-                    		// Grab an black and white image with white as the selected area.
-
-                    		Core.inRange(hsv, lowHSV, highHSV, image);
-
-                			hsv.release();
-
-                    		// Clear the previous contours and grab the new ones.
-                    		
-                    		contours.clear();
-                    		
-                    		Imgproc.findContours(image, contours, temp,
-                    							 Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-                			image.release();
-                            temp.release();
-
-                    		// Grab the co-ords of the corners of the box(es) from the contour list.
-
-                            // Send the information to the main code.
                             
                     		// Show the found contours for the user.
                     		
-                    		for(int i = 0; i < contours.size(); ++i)
-            				{
-                    			Imgproc.drawContours(original, contours, i, WHITE);
-            				}
-
-                    		// Display the cross-hair in the centre of the screen.
-                    		
-                    		Imgproc.line(original, crossH0, crossH1, MAGENTA);
-                    		Imgproc.line(original, crossV0, crossV1, MAGENTA);
-
-                            outputStream_.putFrame(original);
-
-                    		original.release();
             			}
             			
                 		break;
@@ -416,10 +374,6 @@ public class Robot extends SampleRobot
             			if(installedRearCamera_ == true)
             			{
                     		cvRearSink_.grabFrameNoTimeout(original);
-
-                            outputStream_.putFrame(original);
-
-                    		original.release();
             			}
 
                 		break;
@@ -432,6 +386,13 @@ public class Robot extends SampleRobot
             			break;
             		}
             	}
+            	
+        		// Display the cross-hair in the centre of the screen.
+        		
+        		Imgproc.line(original, crossH0, crossH1, MAGENTA);
+        		Imgproc.line(original, crossV0, crossV1, MAGENTA);
+
+                outputStream_.putFrame(original);
             }
 
             System.out.println("Stopped.");

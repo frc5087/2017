@@ -11,6 +11,7 @@ package org.usfirst.frc.team5087.robot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -49,6 +50,12 @@ public class Vision
 		
 		lowHSV_  = new Scalar(55, 100, 100);
 		highHSV_ = new Scalar(95, 255, 255);
+
+		// Thread to process the image.
+		
+        new Thread(() ->
+        {
+        }).start();
 	}
 
 	/*
