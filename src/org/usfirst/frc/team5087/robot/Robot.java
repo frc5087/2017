@@ -3,13 +3,9 @@ package org.usfirst.frc.team5087.robot;
 
 import com.ctre.CANTalon;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -17,6 +13,7 @@ import org.opencv.imgproc.Imgproc;
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
+
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -24,7 +21,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 //import edu.wpi.first.wpilibj.RobotDrive;
-//import edu.wpi.first.wpilibj.CameraServer;
 
 /*
  * 
@@ -468,78 +464,6 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> test()");
     	
-    	int leftRight = 1;
-
-    	double leftMotor = 1.0;
-    	double rightMotor = 1.0;
-    	
-    	double slowDown = 0.001;
-    	
-        int steps = 0;
-
-        drive_.setSafetyEnabled(true);
-
-    	while(isEnabled())
-    	{
-        	drive_.setLeftRightMotorOutputs(leftMotor, rightMotor);
-
-        	if((++steps % 25) == 0)
-        	{
-        		double stamp = Timer.getFPGATimestamp();
-        		
-        		double left  = movement_.movement(0);
-        		double right = movement_.movement(1);
-        		
-           		System.out.format("%2.6f:%2.6f %2.6f %2.6f %2.6f\n",
-           			stamp,
-           			leftMotor, rightMotor,
-           			left, right);
-
-           		if(Math.abs(left - right) == 0.0)
-           		{
-           			continue;
-           		}
-           				
-           		if(Math.abs(left - right) < (2.0 / 4096.0))
-           		{
-           			break;
-           		}
-           		
-           		if(leftRight == -1)
-           		{
-               		if(left > right)
-               		{
-               			leftRight = 0;
-               		}
-               		else
-               		{
-               			leftRight = 1;
-               		}
-           		}
-           		else
-           		{
-               		if(leftRight == 0)
-               		{
-               			// The left distance was greater than the right, so we need to slow the
-               			// left motor(s) down to match the right.
-
-               			leftMotor -= slowDown;
-               		}
-               		else
-               		{
-               			// The right distance was greater than the left, so we need to slow the
-               			// right motor(s) down to match the left.
-
-               			rightMotor -= slowDown;
-               		}
-           		}
-        	}
-
-        	Timer.delay(0.005);
-    	}
-
-    	drive_.setLeftRightMotorOutputs(0.0, 0.0);
-
     	System.out.println("<- test()");
     }
 
@@ -673,6 +597,8 @@ public class Robot extends SampleRobot
     	if((installedClimb_ == true)
     	&& (cameraInUse_ == REAR_CAMERA))
     	{
+    		// Debug code to track any issues.
+    		
     		if((++counter_ % 10) == 0)
     		{
     			System.out.format("%1.4f[%1.4f]:%2.4f/%2.4f\n",
@@ -703,7 +629,8 @@ public class Robot extends SampleRobot
     		double current = Math.max(climbLeft_.getOutputCurrent(),
 					   				   climbRight_.getOutputCurrent());
 
-
+    		// Run the state machine for the climb.
+    		
     		switch(climbState_)
     		{
     			case CLIMB_START :
