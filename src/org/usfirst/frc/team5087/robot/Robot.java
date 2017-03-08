@@ -7,7 +7,6 @@ import java.util.Stack;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.cscore.CvSink;
@@ -20,7 +19,6 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
-//import edu.wpi.first.wpilibj.RobotDrive;
 
 /*
  * 
@@ -45,17 +43,12 @@ public class Robot extends SampleRobot
     static final int REAR_CAMERA	= 1;
     static final int FRONT_IMAGE	= 2;
 
+    // Climb state machine.
+    
     static final int CLIMB_START	= 0;
     static final int CLIMB_ATTACH	= 1;
     static final int CLIMB_CLIMBING	= 2;
     static final int CLIMB_STOPPED	= 3;
-
-    static final Scalar BLACK   = new Scalar(  0,   0,   0);
-    static final Scalar RED     = new Scalar(  0,   0, 255);
-    static final Scalar GREEN   = new Scalar(  0, 255,   0);
-    static final Scalar BLUE    = new Scalar(255,   0,   0);
-    static final Scalar MAGENTA = new Scalar(255,   0, 255);
-    static final Scalar WHITE   = new Scalar(255, 255, 255);
 
     // List of installed hardware on the robot.
     
@@ -353,10 +346,15 @@ public class Robot extends SampleRobot
             	
             	vision_.show(original);
             	
+            	if(installedSpokeSensor_ == true)
+            	{
+            		spokesensor_.show(original, 72);
+            	}
+            	
         		// Display the cross-hair in the centre of the screen.
         		
-        		Imgproc.line(original, crossH0, crossH1, MAGENTA);
-        		Imgproc.line(original, crossV0, crossV1, MAGENTA);
+        		Imgproc.line(original, crossH0, crossH1, Colours.MAGENTA);
+        		Imgproc.line(original, crossV0, crossV1, Colours.MAGENTA);
 
                 outputStream_.putFrame(original);
                 
