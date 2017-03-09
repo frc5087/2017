@@ -72,10 +72,13 @@ public class SpokeSensor
 	
 	/*
 	 * Show the gear rotation on screen.
+	 * A negative rotation is used on screen as we are looking through the gear.
 	 */
 	
 	public void show(Mat _image, double _rotation)
 	{
+//		System.out.println("v0:" + sensor_[0].getVoltage());
+		
 		double centery = 40;
 		double	centerx = 320 - centery;
 		double radius0 = 5;
@@ -84,7 +87,7 @@ public class SpokeSensor
 
 		if(_rotation != -1)
 		{
-			double angle = Math.toRadians(_rotation - 90);
+			double angle = Math.toRadians(-_rotation - 90);
 			double step  = Math.toRadians(SPOKE_ANGLE);
 			
 			Point center = new Point(centerx, centery);

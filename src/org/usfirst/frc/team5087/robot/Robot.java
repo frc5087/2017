@@ -302,11 +302,6 @@ public class Robot extends SampleRobot
         	
             while(!Thread.interrupted())
             {
-            	if(installedSpokeSensor_ == true)
-            	{
-            		System.out.println("Spoke:" + spokesensor_.position());
-            	}
-            	
             	// Display the correct video.
 
         		original.release();	// TODO should we do this?
@@ -318,9 +313,6 @@ public class Robot extends SampleRobot
             			if(installedFrontCamera_ == true)
             			{
                     		cvFrontSink_.grabFrameNoTimeout(original);
-                            
-                    		// Show the found contours for the user.
-                    		
             			}
             			
                 		break;
@@ -348,7 +340,7 @@ public class Robot extends SampleRobot
             	
             	if(installedSpokeSensor_ == true)
             	{
-            		spokesensor_.show(original, 72);
+            		spokesensor_.show(original, 18);
             	}
             	
         		// Display the cross-hair in the centre of the screen.
