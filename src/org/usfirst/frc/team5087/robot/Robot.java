@@ -26,17 +26,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends SampleRobot
 {
-	// Buttons from the Logitech controller.
-	
-    static final int	BUTTON_A		= 1;
-    static final int	BUTTON_B		= 2;
-    static final int	BUTTON_X		= 3;
-    static final int	BUTTON_Y		= 4;
-    static final int	BUTTON_LT		= 5;
-    static final int	BUTTON_RT		= 6;
-    static final int	BUTTON_BACK	= 7;
-    static final int	BUTTON_START	= 8;
-    
     // Commands to send to the camera control thread.
     
     static final int FRONT_CAMERA	= 0;
@@ -546,7 +535,7 @@ public class Robot extends SampleRobot
     {
     	if(installedJoystick_ == true)
     	{
-            if(joystick_.getRawButton(BUTTON_A) == true)
+            if(joystick_.getRawButton(Controller.BUTTON_A) == true)
             {
             	dropGearButton_ = true;
 
@@ -580,7 +569,7 @@ public class Robot extends SampleRobot
     {
     	if(installedJoystick_ == true)
     	{
-            if(joystick_.getRawButton(BUTTON_START) == true)
+            if(joystick_.getRawButton(Controller.BUTTON_START) == true)
             {
             	if(cameraSwitchButton_ == false)
             	{
