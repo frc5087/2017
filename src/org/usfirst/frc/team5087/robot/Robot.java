@@ -335,21 +335,7 @@ public class Robot extends SampleRobot
             			break;
             		}
             	}
-            	
-            	vision_.show(original);
-            	
-            	if(installedSpokeSensor_ == true)
-            	{
-            		spokesensor_.show(original, 18);
-            	}
-            	
-        		// Display the cross-hair in the centre of the screen.
-        		
-        		Imgproc.line(original, crossH0, crossH1, Colours.MAGENTA);
-        		Imgproc.line(original, crossV0, crossV1, Colours.MAGENTA);
 
-                outputStream_.putFrame(original);
-                
             	// Switch cameras if requested by the main application.
             	
             	if(cameraControl_.empty() == false)
@@ -405,6 +391,19 @@ public class Robot extends SampleRobot
             		}
             	}
             	
+            	vision_.show(original);
+            	
+            	if(installedSpokeSensor_ == true)
+            	{
+            		spokesensor_.show(original, 18);	// TODO fix this!
+            	}
+            	
+        		// Display the cross-hair in the centre of the screen.
+        		
+        		Imgproc.line(original, crossH0, crossH1, Colours.MAGENTA);
+        		Imgproc.line(original, crossV0, crossV1, Colours.MAGENTA);
+
+                outputStream_.putFrame(original);
             }
 
             System.out.println("Stopped.");
@@ -500,7 +499,6 @@ public class Robot extends SampleRobot
      * at the time. 
      */
     
-    @SuppressWarnings("unused")
 	private void moveRobot()
     {
 //      double turningValue;
