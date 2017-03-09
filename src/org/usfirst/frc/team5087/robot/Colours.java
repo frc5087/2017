@@ -14,4 +14,6 @@ public class Colours
     static final Scalar MAGENTA 	= new Scalar(255,   0, 255);
     static final Scalar CYAN 		= new Scalar(255, 255,   0);
     static final Scalar WHITE   	= new Scalar(255, 255, 255);
+    
+    static final Scalar DARK_YELLOW	= new Scalar(  0, 128, 128);    
 }

@@ -2,12 +2,16 @@ package org.usfirst.frc.team5087.robot;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+
 import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 
 public class SpokeSensor
 {
+	static final boolean	SHOW_VOLTAGE	= true;
+	
     static final int		SENSORS		= 6;						// Number of sensors to scan.
 
 	static final int		SPOKES			= 5;						// Spokes on the gear.
@@ -15,8 +19,8 @@ public class SpokeSensor
 	
 	static final double	SENSOR_ANGLE	= SPOKE_ANGLE / SENSORS;
 
-    static final double	COVERED		= 2.0;						// Value when fully covered.
-    static final double	UNCOVERED		= 4.6;						// Value when completely uncovered.
+    static final double	COVERED		= 2.5;						// Value when fully covered.
+    static final double	UNCOVERED		= 4.3;						// Value when completely uncovered.
     
     static final double	FRACTION		= SENSOR_ANGLE / (UNCOVERED - COVERED);
 
@@ -77,61 +81,81 @@ public class SpokeSensor
 	
 	public void show(Mat _image, double _rotation)
 	{
-//		System.out.println("v0:" + sensor_[0].getVoltage());
+		if(SHOW_VOLTAGE == true)
+		{
+			System.out.printf("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f\n",
+					   sensor_[0].getVoltage(),
+					   sensor_[1].getVoltage(),
+					   sensor_[2].getVoltage(),
+					   sensor_[3].getVoltage(),
+					   sensor_[4].getVoltage(),
+					   sensor_[5].getVoltage());
+		}
 		
 		double centery = 40;
 		double	centerx = 320 - centery;
 		double radius0 = 5;
 		double radius1 = 30;
 		double radius2 = 35;
-
-		if(_rotation != -1)
+		
+		double rotation = _rotation;
+		
+		Scalar colour = Colours.YELLOW;
+		
+		if(_rotation == -1)
 		{
-			double angle = Math.toRadians(-_rotation - 90);
-			double step  = Math.toRadians(SPOKE_ANGLE);
+			rotation = 0;
 			
-			Point center = new Point(centerx, centery);
-			
-			for(int i = 0; i < SPOKES; ++i)
-			{
-				double xs = centerx + (radius0 * Math.cos(angle));
-				double ys = centery + (radius0 * Math.sin(angle));
-
-				double xe = centerx + (radius1 * Math.cos(angle));
-				double ye = centery + (radius1 * Math.sin(angle));
-
-				Point	ps = new Point(xs, ys);
-				Point	pe = new Point(xe, ye);
-
-				Imgproc.line(_image, ps, pe, Colours.YELLOW);
-
-				angle += step;
-			}
-
-			angle = Math.toRadians((_rotation + (SPOKE_ANGLE / 4)) - 90);
-			step  = Math.toRadians(SPOKE_ANGLE / 2);
-
-			for(int i = 0; i < (SPOKES * 2); ++i)
-			{
-				double xs = centerx + (radius1 * Math.cos(angle));
-				double ys = centery + (radius1 * Math.sin(angle));
-
-				double xe = centerx + (radius2 * Math.cos(angle));
-				double ye = centery + (radius2 * Math.sin(angle));
-
-				Point	ps = new Point(xs, ys);
-				Point	pe = new Point(xe, ye);
-
-				Imgproc.line(_image, ps, pe, Colours.YELLOW);
-
-				angle += step;
-				
-			}
-			
-			Imgproc.circle(_image, center, (int) radius0, Colours.YELLOW);
-			Imgproc.circle(_image, center, (int) radius1, Colours.YELLOW);
+			colour = Colours.DARK_YELLOW;
 		}
-		else
+
+		double angle = Math.toRadians(-rotation - 90);
+		double step  = Math.toRadians(SPOKE_ANGLE);
+		
+		Point center = new Point(centerx, centery);
+		
+		double	xs, ys, xe, ye;
+		
+		for(int i = 0; i < SPOKES; ++i)
+		{
+			xs = centerx + (radius0 * Math.cos(angle));
+			ys = centery + (radius0 * Math.sin(angle));
+
+			xe = centerx + (radius1 * Math.cos(angle));
+			ye = centery + (radius1 * Math.sin(angle));
+
+			Point	ps = new Point(xs, ys);
+			Point	pe = new Point(xe, ye);
+
+			Imgproc.line(_image, ps, pe, colour);
+
+			angle += step;
+		}
+
+		angle = Math.toRadians((-rotation + (SPOKE_ANGLE / 4)) - 90);
+		step  = Math.toRadians(SPOKE_ANGLE / 2);
+
+		for(int i = 0; i < (SPOKES * 2); ++i)
+		{
+			xs = centerx + (radius1 * Math.cos(angle));
+			ys = centery + (radius1 * Math.sin(angle));
+
+			xe = centerx + (radius2 * Math.cos(angle));
+			ye = centery + (radius2 * Math.sin(angle));
+
+			Point	ps = new Point(xs, ys);
+			Point	pe = new Point(xe, ye);
+
+			Imgproc.line(_image, ps, pe, colour);
+
+			angle += step;
+			
+		}
+		
+		Imgproc.circle(_image, center, (int) radius0, colour);
+		Imgproc.circle(_image, center, (int) radius1, colour);
+			
+		if(_rotation == -1)
 		{
 			Point	tl = new Point(centerx - radius1, centery - radius1);
 			Point	tr = new Point(centerx + radius1, centery - radius1);

@@ -395,7 +395,7 @@ public class Robot extends SampleRobot
             	
             	if(installedSpokeSensor_ == true)
             	{
-            		spokesensor_.show(original, 18);	// TODO fix this!
+            		spokesensor_.show(original, spokesensor_.position());	// TODO fix this!
             	}
             	
         		// Display the cross-hair in the centre of the screen.
@@ -499,6 +499,7 @@ public class Robot extends SampleRobot
      * at the time. 
      */
     
+    @SuppressWarnings("unused")
 	private void moveRobot()
     {
 //      double turningValue;
