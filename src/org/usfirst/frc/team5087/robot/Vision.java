@@ -58,8 +58,8 @@ public class Vision
 
 		// Create the low and high HSV values to generate the contours.
 		
-		lowHSV_  = new Scalar(55, 100, 100);
-		highHSV_ = new Scalar(95, 255, 255);
+		lowHSV_  = new Scalar(55, 150, 150);			// 55, 100, 100
+		highHSV_ = new Scalar(95, 255, 255);			// 95, 255, 255
 
     	visionControl_ = new Stack<Mat>();
 
@@ -115,23 +115,15 @@ public class Vision
 	 * Show the last grabbed contours on the screen.
 	 */
 	
+	@SuppressWarnings("unused")
 	public void show(Mat _image)
 	{
-		synchronized(contours_)
-		{
-			if(contours_.isEmpty() == false)
-			{
-				Imgproc.drawContours(_image,
-									 contours_,
-									 -1,
-									 Colours.WHITE);
-			}
-		}
-
 		synchronized(rectangles_)
 		{
 			if(rectangles_.isEmpty() == false)
 			{
+//				System.out.println("R:" + rectangles_.size());
+				
 				Point[] vertices = new Point[4];
 				
 				for(RotatedRect rectangle : rectangles_)
@@ -143,7 +135,8 @@ public class Vision
 					Imgproc.drawContours(_image,
 										 Arrays.asList(points),
 										 -1,
-										 Colours.GREEN);
+										 Colours.RED,
+										 2);
 				}
 			}
 		}
@@ -181,7 +174,7 @@ public class Vision
 			Imgproc.findContours(image_,
 								 contours_,
 								 temp_,
-								 Imgproc.RETR_LIST,
+								 Imgproc.RETR_EXTERNAL,				//RETR_LIST,
 								 Imgproc.CHAIN_APPROX_SIMPLE);
 		}
 		
@@ -196,7 +189,17 @@ public class Vision
 			
 			for(MatOfPoint contour : contours_)
 			{
+				if(contour.toArray().length < 4)
+				{
+					continue;
+				}
+				
 				RotatedRect	rectangle = Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()));
+				
+				if((rectangle.size.height < 2) || (rectangle.size.width < 2))
+				{
+					continue;
+				}
 				
 				rectangles_.add(rectangle);
 			}
