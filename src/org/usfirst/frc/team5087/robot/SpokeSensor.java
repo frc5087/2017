@@ -16,6 +16,7 @@ public class SpokeSensor
 
 	static final int		SPOKES			= 5;						// Spokes on the gear.
 	static final double	SPOKE_ANGLE	= 360.0 / SPOKES;			// Angle between spokes.
+	static final int		SPOKE_WIDTH	= 2;						// Used for on-screen display.
 	
 	static final double	SENSOR_ANGLE	= SPOKE_ANGLE / SENSORS;
 
@@ -127,8 +128,8 @@ public class SpokeSensor
 			Point	ps = new Point(xs, ys);
 			Point	pe = new Point(xe, ye);
 
-			Imgproc.line(_image, ps, pe, colour);
-
+			Imgproc.line(_image, ps, pe, colour, SPOKE_WIDTH);
+			
 			angle += step;
 		}
 
@@ -146,14 +147,14 @@ public class SpokeSensor
 			Point	ps = new Point(xs, ys);
 			Point	pe = new Point(xe, ye);
 
-			Imgproc.line(_image, ps, pe, colour);
+			Imgproc.line(_image, ps, pe, colour, SPOKE_WIDTH);
 
 			angle += step;
 			
 		}
 		
-		Imgproc.circle(_image, center, (int) radius0, colour);
-		Imgproc.circle(_image, center, (int) radius1, colour);
+		Imgproc.circle(_image, center, (int) radius0, colour, 2);
+		Imgproc.circle(_image, center, (int) radius1, colour, 2);
 			
 		if(_rotation == -1)
 		{
@@ -162,8 +163,8 @@ public class SpokeSensor
 			Point	bl = new Point(centerx - radius1, centery + radius1);
 			Point	br = new Point(centerx + radius1, centery + radius1);
 
-			Imgproc.line(_image, tl, br, Colours.RED);
-			Imgproc.line(_image, tr, bl, Colours.RED);
+			Imgproc.line(_image, tl, br, Colours.RED, SPOKE_WIDTH);
+			Imgproc.line(_image, tr, bl, Colours.RED, SPOKE_WIDTH);
 		}
 	}
 }
