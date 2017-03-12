@@ -440,7 +440,8 @@ public class Robot extends SampleRobot
      * @see edu.wpi.first.wpilibj.SampleRobot#operatorControl()
      */
     
-    public void operatorControl()
+    @SuppressWarnings("unused")
+	public void operatorControl()
     {
     	System.out.println("-> operatorControl()");
     	
