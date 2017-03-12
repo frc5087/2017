@@ -115,15 +115,12 @@ public class Vision
 	 * Show the last grabbed contours on the screen.
 	 */
 	
-	@SuppressWarnings("unused")
 	public void show(Mat _image)
 	{
 		synchronized(rectangles_)
 		{
 			if(rectangles_.isEmpty() == false)
 			{
-//				System.out.println("R:" + rectangles_.size());
-				
 				Point[] vertices = new Point[4];
 				
 				for(RotatedRect rectangle : rectangles_)
@@ -174,7 +171,7 @@ public class Vision
 			Imgproc.findContours(image_,
 								 contours_,
 								 temp_,
-								 Imgproc.RETR_EXTERNAL,				//RETR_LIST,
+								 Imgproc.RETR_EXTERNAL,
 								 Imgproc.CHAIN_APPROX_SIMPLE);
 		}
 		

@@ -73,7 +73,7 @@ public class Movement
 			last_[_side] = position(_side);
 			
 			tal_[_side].setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-			tal_[_side].reverseSensor(false);				
+			tal_[_side].reverseSensor(false);
 			
 			System.out.println("Sensor on " + names_[_side] + " side configured.");
 		}
@@ -96,6 +96,10 @@ public class Movement
 		System.out.println("PulseWidthRiseToRiseUs ... " + tal_[_side].getPulseWidthRiseToRiseUs());
 		System.out.println("PulseWidthVelocity ....... " + tal_[_side].getPulseWidthVelocity());
 	}
+	
+	/*
+	 * Return the encoder position for the requested side.
+	 */
 	
 	int position(int _side)
 	{
