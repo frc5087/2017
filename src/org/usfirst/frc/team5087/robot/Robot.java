@@ -129,7 +129,7 @@ public class Robot extends SampleRobot
         	
         	leftFront_.configMaxOutputVoltage(12.0);
         	leftFront_.configNominalOutputVoltage(12.0, 12.0);
-        	leftFront_.configPeakOutputVoltage(12.0,  12.0);
+        	leftFront_.configPeakOutputVoltage(12.0, 12.0);
 
         	leftRear_.configMaxOutputVoltage(12.0);
         	leftRear_.configNominalOutputVoltage(12.0, 12.0);
@@ -137,11 +137,11 @@ public class Robot extends SampleRobot
         	
         	rightFront_.configMaxOutputVoltage(12.0);
         	rightFront_.configNominalOutputVoltage(12.0, 12.0);
-        	rightFront_.configPeakOutputVoltage(12.0,  12.0);
+        	rightFront_.configPeakOutputVoltage(12.0, 12.0);
 
         	rightRear_.configMaxOutputVoltage(12.0);
         	rightRear_.configNominalOutputVoltage(12.0, 12.0);
-        	rightRear_.configPeakOutputVoltage(12.0,  12.0);
+        	rightRear_.configPeakOutputVoltage(12.0, 12.0);
 
         	movement_ = new Movement(leftFront_, rightRear_);
         
@@ -444,7 +444,10 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> operatorControl()");
     	
-        drive_.setSafetyEnabled(true);
+    	if(installedDrive_ == true)
+    	{
+    		drive_.setSafetyEnabled(true);
+    	}
         
         while(isOperatorControl() && isEnabled())
         {

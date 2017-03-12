@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
 public class SpokeSensor
 {
 	static final boolean	SHOW_VOLTAGE	= true;
+	static final boolean SHOW_SPOKES	= true;
+	static final boolean SHOW_TEETH		= false;
 	
     static final int		SENSORS		= 6;						// Number of sensors to scan.
 
@@ -80,6 +82,7 @@ public class SpokeSensor
 	 * A negative rotation is used on screen as we are looking through the gear.
 	 */
 	
+	@SuppressWarnings("unused")
 	public void show(Mat _image, double _rotation)
 	{
 		if(SHOW_VOLTAGE == true)
@@ -109,52 +112,59 @@ public class SpokeSensor
 			
 			colour = Colours.DARK_YELLOW;
 		}
-
-		double angle = Math.toRadians(-rotation - 90);
-		double step  = Math.toRadians(SPOKE_ANGLE);
 		
 		Point center = new Point(centerx, centery);
 		
+		double angle, step;
+		
 		double	xs, ys, xe, ye;
-		
-		for(int i = 0; i < SPOKES; ++i)
+
+		if(SHOW_SPOKES == true)
 		{
-			xs = centerx + (radius0 * Math.cos(angle));
-			ys = centery + (radius0 * Math.sin(angle));
-
-			xe = centerx + (radius1 * Math.cos(angle));
-			ye = centery + (radius1 * Math.sin(angle));
-
-			Point	ps = new Point(xs, ys);
-			Point	pe = new Point(xe, ye);
-
-			Imgproc.line(_image, ps, pe, colour, SPOKE_WIDTH);
+			angle = Math.toRadians(-rotation - 90);
+			step  = Math.toRadians(SPOKE_ANGLE);
 			
-			angle += step;
+			for(int i = 0; i < SPOKES; ++i)
+			{
+				xs = centerx + (radius0 * Math.cos(angle));
+				ys = centery + (radius0 * Math.sin(angle));
+
+				xe = centerx + (radius1 * Math.cos(angle));
+				ye = centery + (radius1 * Math.sin(angle));
+
+				Point	ps = new Point(xs, ys);
+				Point	pe = new Point(xe, ye);
+
+				Imgproc.line(_image, ps, pe, colour, SPOKE_WIDTH);
+				
+				angle += step;
+			}
+			
+			Imgproc.circle(_image, center, (int) radius0, colour, SPOKE_WIDTH);
+			Imgproc.circle(_image, center, (int) radius1, colour, SPOKE_WIDTH);
 		}
 
-		angle = Math.toRadians((-rotation + (SPOKE_ANGLE / 4)) - 90);
-		step  = Math.toRadians(SPOKE_ANGLE / 2);
-
-		for(int i = 0; i < (SPOKES * 2); ++i)
+		if(SHOW_TEETH == true)
 		{
-			xs = centerx + (radius1 * Math.cos(angle));
-			ys = centery + (radius1 * Math.sin(angle));
+			angle = Math.toRadians((-rotation + (SPOKE_ANGLE / 4)) - 90);
+			step  = Math.toRadians(SPOKE_ANGLE / 2);
 
-			xe = centerx + (radius2 * Math.cos(angle));
-			ye = centery + (radius2 * Math.sin(angle));
+			for(int i = 0; i < (SPOKES * 2); ++i)
+			{
+				xs = centerx + (radius1 * Math.cos(angle));
+				ys = centery + (radius1 * Math.sin(angle));
 
-			Point	ps = new Point(xs, ys);
-			Point	pe = new Point(xe, ye);
+				xe = centerx + (radius2 * Math.cos(angle));
+				ye = centery + (radius2 * Math.sin(angle));
 
-			Imgproc.line(_image, ps, pe, colour, SPOKE_WIDTH);
+				Point	ps = new Point(xs, ys);
+				Point	pe = new Point(xe, ye);
 
-			angle += step;
-			
+				Imgproc.line(_image, ps, pe, colour, SPOKE_WIDTH * 3);
+
+				angle += step;
+			}
 		}
-		
-		Imgproc.circle(_image, center, (int) radius0, colour, 2);
-		Imgproc.circle(_image, center, (int) radius1, colour, 2);
 			
 		if(_rotation == -1)
 		{
