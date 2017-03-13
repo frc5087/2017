@@ -44,7 +44,7 @@ public class Robot extends SampleRobot
     
     final	boolean	installedDrive_			= true;
     final	boolean	installedGyro_			= false;
-    final	boolean	installedSpokeSensor_	= false;
+    final	boolean	installedSpokeSensor_	= true;
     final	boolean	installedJoystick_		= true;
     final	boolean	installedFrontCamera_	= true;
     final	boolean	installedRearCamera_	= true;
