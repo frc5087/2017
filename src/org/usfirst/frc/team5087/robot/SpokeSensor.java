@@ -22,8 +22,8 @@ public class SpokeSensor
 	
 	static final double	SENSOR_ANGLE	= SPOKE_ANGLE / SENSORS;
 
-    static final double	COVERED		= 2.5;						// Value when fully covered.
-    static final double	UNCOVERED		= 4.3;						// Value when completely uncovered.
+    static final double	COVERED		= 3.0;						// Value when fully covered.
+    static final double	UNCOVERED		= 4.1;						// Value when completely uncovered.
     
     static final double	FRACTION		= SENSOR_ANGLE / (UNCOVERED - COVERED);
 
@@ -64,17 +64,20 @@ public class SpokeSensor
 		
 		// Only a maximum of two sensors can be covered at once.
 		
-		for(int i = 0; i < SENSORS; ++i)
+		for(int i = (SENSORS - 1); i >= 0; --i)
 		{
 			double voltage0 = sensor_[i].getVoltage();
 			
 			if(voltage0 < UNCOVERED)
 			{
-				double	voltage1 = sensor_[(i + 1) % SENSORS].getVoltage();
-				
-				if(voltage1 < UNCOVERED)
+				if(i > 0)
 				{
-					angle += (voltage0 - COVERED) * FRACTION;
+					double	voltage1 = sensor_[(i - 1) % SENSORS].getVoltage();
+					
+					if(voltage1 < UNCOVERED)
+					{
+						angle += (voltage0 - COVERED) * FRACTION;
+					}
 				}
 				
 				ret = angle;

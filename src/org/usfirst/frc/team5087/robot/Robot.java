@@ -87,11 +87,6 @@ public class Robot extends SampleRobot
 
 	private	CANTalon[]	talons_ = new CANTalon[6];
 
-    CANTalon			leftFront_;
-    CANTalon			leftRear_;
-    CANTalon			rightFront_;
-    CANTalon			rightRear_;
-    
     CANTalon			climbLeft_;
     CANTalon			climbRight_;
 
