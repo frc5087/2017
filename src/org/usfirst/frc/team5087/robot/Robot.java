@@ -40,11 +40,6 @@ public class Robot extends SampleRobot
     static final int CLIMB_CLIMBING	= 2;
     static final int CLIMB_STOPPED	= 3;
 
-    static final int	DRIVE_LEFT_SLAVE		= 0;
-    static final int	DRIVE_LEFT_MASTER		= 1;
-    static final int	DRIVE_RIGHT_SLAVE		= 2;
-    static final int	DRIVE_RIGHT_MASTER	= 3;
-    
     double angleSetpoint = 0.0;
     
     final double pGain = .006; //proportional turning constant
@@ -72,9 +67,7 @@ public class Robot extends SampleRobot
     
     CvSource			outputStream_;
     
-    double				speedLimit_;
-
-	private	CANTalon[]	talons_ = new CANTalon[6];
+    double				speedLimit_ = 0.90;		// 90% of max speed.
 
     CANTalon			climbLeft_;
     CANTalon			climbRight_;
@@ -87,6 +80,7 @@ public class Robot extends SampleRobot
     
     Movement			movement_;
 
+    MotorControl		motor_;
     RamsRobotDrive		drive_;
     AnalogGyro			gyro_;
     Joystick			joystick_;
@@ -107,41 +101,14 @@ public class Robot extends SampleRobot
     	cameraControl_ = new Stack<Integer>();
     	
     	cameraSwitchButton_ = false;
-    	
-    	// Motor controllers for the robot movement.
 
     	if(InstalledHardware.DRIVE == true)
     	{
-    		// Talon #4 has the left gear-box sensor.
-    		
-        	talons_[DRIVE_LEFT_MASTER]	= new CANTalon(4);
-        	talons_[DRIVE_LEFT_SLAVE]		= new CANTalon(8);
-        	
-        	talons_[DRIVE_LEFT_SLAVE].changeControlMode(TalonControlMode.Follower);
-        	talons_[DRIVE_LEFT_SLAVE].set(talons_[DRIVE_LEFT_MASTER].getDeviceID());
-        	
-        	// Talon #2 has the right gear-box sensor.
-        	
-        	talons_[DRIVE_RIGHT_MASTER]	= new CANTalon(2);
-        	talons_[DRIVE_RIGHT_SLAVE]	= new CANTalon(1);
+    		motor_ = new MotorControl();
 
-        	talons_[DRIVE_RIGHT_SLAVE].changeControlMode(TalonControlMode.Follower);
-        	talons_[DRIVE_RIGHT_SLAVE].set(talons_[DRIVE_RIGHT_MASTER].getDeviceID());
-
-        	// Not sure if these need setting, but lets do it anyway.
-
-        	for(int i = 0; i < 4; ++i)
-        	{
-            	talons_[i].configMaxOutputVoltage(12.0);
-            	talons_[i].configNominalOutputVoltage(12.0, 12.0);
-            	talons_[i].configPeakOutputVoltage(12.0, 12.0);
-        	}
-
-        	movement_ = new Movement(talons_[DRIVE_LEFT_MASTER],
-        							 talons_[DRIVE_RIGHT_MASTER]);
+        	movement_ = new Movement(motor_.left(), motor_.right());
         
-        	drive_ = new RamsRobotDrive(talons_[DRIVE_LEFT_MASTER],
-        								talons_[DRIVE_RIGHT_MASTER]);
+        	drive_ = new RamsRobotDrive(motor_.left(), motor_.right());
         	
             drive_.setExpiration(0.1f);
             
