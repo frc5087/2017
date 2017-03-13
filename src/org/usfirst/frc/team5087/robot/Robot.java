@@ -2,6 +2,7 @@
 package org.usfirst.frc.team5087.robot;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
 
 import java.util.Stack;
 
@@ -41,14 +42,19 @@ public class Robot extends SampleRobot
 
     // List of installed hardware on the robot.
     
-    final	boolean	installedDrive_			= false;
+    final	boolean	installedDrive_			= true;
     final	boolean	installedGyro_			= false;
-    final	boolean	installedSpokeSensor_	= true;
-    final	boolean	installedJoystick_		= false;
+    final	boolean	installedSpokeSensor_	= false;
+    final	boolean	installedJoystick_		= true;
     final	boolean	installedFrontCamera_	= true;
-    final	boolean	installedRearCamera_	= false;
-    final	boolean	installedClimb_			= false;
-    final	boolean	installedGearDrop_		= false;
+    final	boolean	installedRearCamera_	= true;
+    final	boolean	installedClimb_			= true;
+    final	boolean	installedGearDrop_		= true;
+    
+    static final int	DRIVE_LEFT_SLAVE		= 0;
+    static final int	DRIVE_LEFT_MASTER		= 1;
+    static final int	DRIVE_RIGHT_SLAVE		= 2;
+    static final int	DRIVE_RIGHT_MASTER	= 3;
     
     double angleSetpoint = 0.0;
     
@@ -78,6 +84,8 @@ public class Robot extends SampleRobot
     CvSource			outputStream_;
     
     double				speedLimit_;
+
+	private	CANTalon[]	talons_ = new CANTalon[6];
 
     CANTalon			leftFront_;
     CANTalon			leftRear_;
@@ -120,36 +128,40 @@ public class Robot extends SampleRobot
 
     	if(installedDrive_ == true)
     	{
-        	leftFront_  = new CANTalon(4);
-        	leftRear_   = new CANTalon(8);
-        	rightFront_ = new CANTalon(1);
-        	rightRear_  = new CANTalon(2);
-    	
+    		// Talon #4 has the left gear-box sensor.
+    		
+        	talons_[DRIVE_LEFT_MASTER]	= new CANTalon(4);
+        	talons_[DRIVE_LEFT_SLAVE]		= new CANTalon(8);
+        	
+        	talons_[DRIVE_LEFT_SLAVE].changeControlMode(TalonControlMode.Follower);
+        	talons_[DRIVE_LEFT_SLAVE].set(talons_[DRIVE_LEFT_MASTER].getDeviceID());
+        	
+        	// Talon #2 has the right gear-box sensor.
+        	
+        	talons_[DRIVE_RIGHT_MASTER]	= new CANTalon(2);
+        	talons_[DRIVE_RIGHT_SLAVE]	= new CANTalon(1);
+
+        	talons_[DRIVE_RIGHT_SLAVE].changeControlMode(TalonControlMode.Follower);
+        	talons_[DRIVE_RIGHT_SLAVE].set(talons_[DRIVE_RIGHT_MASTER].getDeviceID());
+
         	// Not sure if these need setting, but lets do it anyway.
-        	
-        	leftFront_.configMaxOutputVoltage(12.0);
-        	leftFront_.configNominalOutputVoltage(12.0, 12.0);
-        	leftFront_.configPeakOutputVoltage(12.0, 12.0);
 
-        	leftRear_.configMaxOutputVoltage(12.0);
-        	leftRear_.configNominalOutputVoltage(12.0, 12.0);
-        	leftRear_.configPeakOutputVoltage(12.0,  12.0);
-        	
-        	rightFront_.configMaxOutputVoltage(12.0);
-        	rightFront_.configNominalOutputVoltage(12.0, 12.0);
-        	rightFront_.configPeakOutputVoltage(12.0, 12.0);
+        	for(int i = 0; i < 4; ++i)
+        	{
+            	talons_[i].configMaxOutputVoltage(12.0);
+            	talons_[i].configNominalOutputVoltage(12.0, 12.0);
+            	talons_[i].configPeakOutputVoltage(12.0, 12.0);
+        	}
 
-        	rightRear_.configMaxOutputVoltage(12.0);
-        	rightRear_.configNominalOutputVoltage(12.0, 12.0);
-        	rightRear_.configPeakOutputVoltage(12.0, 12.0);
-
-        	movement_ = new Movement(leftFront_, rightRear_);
+        	movement_ = new Movement(talons_[DRIVE_LEFT_MASTER],
+        							 talons_[DRIVE_RIGHT_MASTER]);
         
-        	drive_ = new RamsRobotDrive(leftRear_ ,leftFront_, rightRear_, rightFront_);
-            
+        	drive_ = new RamsRobotDrive(talons_[DRIVE_LEFT_MASTER],
+        								talons_[DRIVE_RIGHT_MASTER]);
+        	
             drive_.setExpiration(0.1f);
             
-            speedLimit_ = 0.50;			// Max of 50% speed for movement.
+            speedLimit_ = 0.90;			// Max of 50% speed for movement.
     	}
     	
     	if(installedClimb_ == true)
@@ -225,6 +237,22 @@ public class Robot extends SampleRobot
         {
         	System.out.println("-> Thread()");
 
+        	// Create the Mat data required by the capture code.
+        	
+			Mat	original = new Mat();
+			
+			Mat copyimage = new Mat();
+
+			// Points for the cross-hair lines.
+			
+    		Point crossH0 = new Point(160 - 8, 120);
+    		Point crossH1 = new Point(160 + 8, 120);
+
+    		Point crossV0 = new Point(160, 120 - 8);
+    		Point crossV1 = new Point(160, 120 + 8);
+
+    		double spokerotation;
+    		
         	cameraInUse_ = FRONT_CAMERA;
 
         	// Front camera is used for dropping the gear off and will be used by the OpenCV code.
@@ -271,26 +299,22 @@ public class Robot extends SampleRobot
             	cvRearSink_.setSource(usbRearCamera_);
         	}
         	
-        	outputStream_ = CameraServer.getInstance().putVideo("Robot Camera", 320, 240);
-
-        	// Create the Mat data required by the capture code.
+        	// If either camera is installed, create the output stream.
         	
-			Mat	original = new Mat();
-			
-			Mat copyimage = new Mat();
-
-			// Points for the cross-hair lines.
-			
-    		Point crossH0 = new Point(160 - 8, 120);
-    		Point crossH1 = new Point(160 + 8, 120);
-
-    		Point crossV0 = new Point(160, 120 - 8);
-    		Point crossV1 = new Point(160, 120 + 8);
-    		
+    		if((installedFrontCamera_ == true) || (installedRearCamera_ == true))
+    		{
+    			outputStream_ = CameraServer.getInstance().putVideo("Robot Camera", 320, 240);
+    		}
+    		    		
         	System.out.println("Running ...");
         	
             while(!Thread.interrupted())
             {
+            	if(installedSpokeSensor_ == true)
+            	{
+            		spokerotation = spokesensor_.position();
+            	}
+            	
             	// Display the correct video.
 
         		original.release();	// TODO should we do this?
@@ -379,20 +403,35 @@ public class Robot extends SampleRobot
             			}
             		}
             	}
-            	
-            	vision_.show(original);
-            	
-            	if(installedSpokeSensor_ == true)
-            	{
-            		spokesensor_.show(original, spokesensor_.position());	// TODO fix this!
-            	}
-            	
-        		// Display the cross-hair in the centre of the screen.
-        		
-        		Imgproc.line(original, crossH0, crossH1, Colours.MAGENTA);
-        		Imgproc.line(original, crossV0, crossV1, Colours.MAGENTA);
 
-                outputStream_.putFrame(original);
+        		if((installedFrontCamera_ == true) || (installedRearCamera_ == true))
+        		{
+            		vision_.show(original);
+            		
+                	if(installedSpokeSensor_ == true)
+                	{
+                		spokesensor_.show(original, spokerotation);
+                	}
+            	
+            		// Display the cross-hair in the centre of the screen.
+            		
+            		Imgproc.line(original, crossH0, crossH1, Colours.MAGENTA);
+            		Imgproc.line(original, crossV0, crossV1, Colours.MAGENTA);
+
+                    outputStream_.putFrame(original);
+        		}
+        		else
+        		{
+            		try
+            		{
+						Thread.sleep(50);
+					}
+            		
+            		catch (InterruptedException e)
+            		{
+						e.printStackTrace();
+					}
+        		}
             }
 
             System.out.println("Stopped.");
@@ -403,7 +442,7 @@ public class Robot extends SampleRobot
         
 		visionThread_.setDaemon(true);
 		visionThread_.start();
-
+		
     	System.out.println("<- robotInit()");
     }
 
@@ -459,6 +498,11 @@ public class Robot extends SampleRobot
         	switchCamera();
         	
         	climbRope();
+        	
+        	if(installedSpokeSensor_ == true)
+        	{
+        		System.out.println("S:" + spokesensor_.position());	// TODO fix this!
+        	}
         	
             Timer.delay(0.005);
         }

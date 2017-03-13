@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 
 public class SpokeSensor
 {
-	static final boolean	SHOW_VOLTAGE	= false;
+	static final boolean	SHOW_VOLTAGE	= true;
 	static final boolean SHOW_SPOKES	= true;
 	static final boolean SHOW_TEETH		= false;
 	
@@ -47,6 +47,17 @@ public class SpokeSensor
 	
 	public double position()
 	{
+		if(SHOW_VOLTAGE == true)
+		{
+			System.out.printf("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f\n",
+					   sensor_[0].getVoltage(),
+					   sensor_[1].getVoltage(),
+					   sensor_[2].getVoltage(),
+					   sensor_[3].getVoltage(),
+					   sensor_[4].getVoltage(),
+					   sensor_[5].getVoltage());
+		}
+		
 		double	ret = -1;
 		
 		double	angle = 0;
@@ -85,17 +96,6 @@ public class SpokeSensor
 	@SuppressWarnings("unused")
 	public void show(Mat _image, double _rotation)
 	{
-		if(SHOW_VOLTAGE == true)
-		{
-			System.out.printf("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f\n",
-					   sensor_[0].getVoltage(),
-					   sensor_[1].getVoltage(),
-					   sensor_[2].getVoltage(),
-					   sensor_[3].getVoltage(),
-					   sensor_[4].getVoltage(),
-					   sensor_[5].getVoltage());
-		}
-		
 		double centery = 40;
 		double	centerx = 320 - centery;
 		double radius0 = 5;

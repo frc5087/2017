@@ -58,7 +58,7 @@ public class Vision
 
 		// Create the low and high HSV values to generate the contours.
 		
-		lowHSV_  = new Scalar(55, 150, 150);			// 55, 100, 100
+		lowHSV_  = new Scalar(50, 100, 100);			// 55, 100, 100
 		highHSV_ = new Scalar(95, 255, 255);			// 95, 255, 255
 
     	visionControl_ = new Stack<Mat>();
@@ -138,7 +138,7 @@ public class Vision
 			}
 		}
 	}
-
+	
 	/*
 	 * Process the images and grab the co-ords of the two boxes that should be on screen.
 	 */
@@ -193,7 +193,7 @@ public class Vision
 				
 				RotatedRect	rectangle = Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()));
 				
-				if((rectangle.size.height < 2) || (rectangle.size.width < 2))
+				if((rectangle.size.height < 8) || (rectangle.size.width < 8))
 				{
 					continue;
 				}
