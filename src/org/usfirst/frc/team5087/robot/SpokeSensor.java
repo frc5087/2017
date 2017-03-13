@@ -60,7 +60,7 @@ public class SpokeSensor
 		
 		double	ret = -1;
 		
-		double	angle = 0;
+		double	angle = SPOKE_ANGLE;
 		
 		// Only a maximum of two sensors can be covered at once.
 		

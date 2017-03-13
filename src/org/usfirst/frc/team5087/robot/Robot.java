@@ -40,17 +40,6 @@ public class Robot extends SampleRobot
     static final int CLIMB_CLIMBING	= 2;
     static final int CLIMB_STOPPED	= 3;
 
-    // List of installed hardware on the robot.
-    
-    final	boolean	installedDrive_			= true;
-    final	boolean	installedGyro_			= false;
-    final	boolean	installedSpokeSensor_	= true;
-    final	boolean	installedJoystick_		= true;
-    final	boolean	installedFrontCamera_	= true;
-    final	boolean	installedRearCamera_	= true;
-    final	boolean	installedClimb_			= true;
-    final	boolean	installedGearDrop_		= true;
-    
     static final int	DRIVE_LEFT_SLAVE		= 0;
     static final int	DRIVE_LEFT_MASTER		= 1;
     static final int	DRIVE_RIGHT_SLAVE		= 2;
@@ -121,7 +110,7 @@ public class Robot extends SampleRobot
     	
     	// Motor controllers for the robot movement.
 
-    	if(installedDrive_ == true)
+    	if(InstalledHardware.DRIVE == true)
     	{
     		// Talon #4 has the left gear-box sensor.
     		
@@ -159,7 +148,7 @@ public class Robot extends SampleRobot
             speedLimit_ = 0.90;			// Max of 50% speed for movement.
     	}
     	
-    	if(installedClimb_ == true)
+    	if(InstalledHardware.CLIMB == true)
     	{
         	climbLeft_  = new CANTalon(16);
         	climbRight_ = new CANTalon(17);
@@ -179,14 +168,14 @@ public class Robot extends SampleRobot
         	climbState_ = CLIMB_START;
     	}
     	
-    	if(installedSpokeSensor_ == true)
+    	if(InstalledHardware.SPOKE_SENSOR == true)
     	{
     		spokesensor_ = new SpokeSensor();
     	}
 
         // Variables for the gyro.
 
-    	if(installedGyro_ == true)
+    	if(InstalledHardware.GYROSCOPE == true)
     	{
             gyro_ = new AnalogGyro(0);
             
@@ -196,14 +185,14 @@ public class Robot extends SampleRobot
     	
         // Allocate a new joystick for the robot control.
 
-    	if(installedJoystick_ == true)
+    	if(InstalledHardware.JOYSTICK == true)
     	{
     		joystick_ = new Joystick(0);
     	}
 
         // Variables required to handle dropping the gear.
 
-        if(installedGearDrop_ == true)
+        if(InstalledHardware.GEAR_DROP == true)
         {
             drop_ = new Solenoid(0);
             
@@ -252,7 +241,7 @@ public class Robot extends SampleRobot
 
         	// Front camera is used for dropping the gear off and will be used by the OpenCV code.
     
-        	if(installedFrontCamera_ == true)
+        	if(InstalledHardware.FRONT_CAMERA == true)
         	{
             	usbFrontCamera_ = CameraServer.getInstance().startAutomaticCapture(0);
 
@@ -281,7 +270,7 @@ public class Robot extends SampleRobot
             
             // The rear camera is only used when we are looking for the rope.
 
-        	if(installedRearCamera_ == true)
+        	if(InstalledHardware.REAR_CAMERA == true)
         	{
             	usbRearCamera_ = CameraServer.getInstance().startAutomaticCapture(1);
 
@@ -296,7 +285,8 @@ public class Robot extends SampleRobot
         	
         	// If either camera is installed, create the output stream.
         	
-    		if((installedFrontCamera_ == true) || (installedRearCamera_ == true))
+    		if((InstalledHardware.FRONT_CAMERA == true)
+    		|| (InstalledHardware.REAR_CAMERA == true))
     		{
     			outputStream_ = CameraServer.getInstance().putVideo("Robot Camera", 320, 240);
     		}
@@ -305,7 +295,7 @@ public class Robot extends SampleRobot
         	
             while(!Thread.interrupted())
             {
-            	if(installedSpokeSensor_ == true)
+            	if(InstalledHardware.SPOKE_SENSOR == true)
             	{
             		spokerotation = spokesensor_.position();
             	}
@@ -318,7 +308,7 @@ public class Robot extends SampleRobot
             	{
             		case FRONT_CAMERA :
             		{
-            			if(installedFrontCamera_ == true)
+            			if(InstalledHardware.FRONT_CAMERA == true)
             			{
                     		cvFrontSink_.grabFrameNoTimeout(original);
             			}
@@ -328,7 +318,7 @@ public class Robot extends SampleRobot
             		
             		case REAR_CAMERA :
             		{
-            			if(installedRearCamera_ == true)
+            			if(InstalledHardware.REAR_CAMERA == true)
             			{
                     		cvRearSink_.grabFrameNoTimeout(original);
             			}
@@ -354,7 +344,7 @@ public class Robot extends SampleRobot
             		{
         				case FRONT_CAMERA :
         				{
-        					if(installedFrontCamera_ == true)
+        					if(InstalledHardware.FRONT_CAMERA == true)
         					{
         						cameraInUse_ = FRONT_CAMERA;
 
@@ -367,7 +357,7 @@ public class Robot extends SampleRobot
         			
             			case REAR_CAMERA :
             			{
-            				if(installedRearCamera_ == true)
+            				if(InstalledHardware.REAR_CAMERA == true)
             				{
             					cameraInUse_ = REAR_CAMERA;
 
@@ -380,7 +370,7 @@ public class Robot extends SampleRobot
             			
             			case FRONT_IMAGE :
             			{
-            				if(installedFrontCamera_ == true)
+            				if(InstalledHardware.FRONT_CAMERA == true)
             				{
             					original.copyTo(copyimage);
             					
@@ -399,11 +389,12 @@ public class Robot extends SampleRobot
             		}
             	}
 
-        		if((installedFrontCamera_ == true) || (installedRearCamera_ == true))
+        		if((InstalledHardware.FRONT_CAMERA == true)
+        		|| (InstalledHardware.FRONT_CAMERA == true))
         		{
             		vision_.show(original);
             		
-                	if(installedSpokeSensor_ == true)
+                	if(InstalledHardware.SPOKE_SENSOR == true)
                 	{
                 		spokesensor_.show(original, spokerotation);
                 	}
@@ -479,7 +470,7 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> operatorControl()");
     	
-    	if(installedDrive_ == true)
+    	if(InstalledHardware.DRIVE == true)
     	{
     		drive_.setSafetyEnabled(true);
     	}
@@ -494,7 +485,7 @@ public class Robot extends SampleRobot
         	
         	climbRope();
         	
-        	if(installedSpokeSensor_ == true)
+        	if(InstalledHardware.SPOKE_SENSOR == true)
         	{
         		System.out.println("S:" + spokesensor_.position());	// TODO fix this!
         	}
@@ -540,7 +531,7 @@ public class Robot extends SampleRobot
 
 //    	turningValue =  (angleSetpoint - gyro.getAngle()) * pGain;
 
-    	if(installedDrive_ == true)
+    	if(InstalledHardware.DRIVE == true)
     	{
         	switch(cameraInUse_)
         	{
@@ -576,13 +567,13 @@ public class Robot extends SampleRobot
     @SuppressWarnings("unused")
 	private void dropGear()
     {
-    	if(installedJoystick_ == true)
+    	if(InstalledHardware.JOYSTICK == true)
     	{
             if(joystick_.getRawButton(Controller.BUTTON_A) == true)
             {
             	dropGearButton_ = true;
 
-            	if(installedGearDrop_ == true)
+            	if(InstalledHardware.GEAR_DROP == true)
             	{
             		drop_.set(true);
             	}
@@ -593,7 +584,7 @@ public class Robot extends SampleRobot
             	{
             		dropGearButton_ = false;
             		
-                	if(installedGearDrop_ == true)
+                	if(InstalledHardware.GEAR_DROP == true)
                 	{
                 		drop_.set(false);
                 	}
@@ -610,7 +601,7 @@ public class Robot extends SampleRobot
     @SuppressWarnings("unused")
 	private void switchCamera()
     {
-    	if(installedJoystick_ == true)
+    	if(InstalledHardware.JOYSTICK == true)
     	{
             if(joystick_.getRawButton(Controller.BUTTON_START) == true)
             {
@@ -618,14 +609,14 @@ public class Robot extends SampleRobot
             	{
             		if(cameraInUse_ == FRONT_CAMERA)
             		{
-            			if(installedRearCamera_ == true)
+            			if(InstalledHardware.REAR_CAMERA == true)
             			{
             				request(REAR_CAMERA);
             			}
             		}
             		else
             		{
-            			if(installedFrontCamera_ == true)
+            			if(InstalledHardware.FRONT_CAMERA == true)
             			{
             				request(FRONT_CAMERA);
             			}
@@ -653,7 +644,7 @@ public class Robot extends SampleRobot
     @SuppressWarnings("unused")
 	private void climbRope()
     {
-    	if((installedClimb_ == true)
+    	if((InstalledHardware.CLIMB == true)
     	&& (cameraInUse_ == REAR_CAMERA))
     	{
     		// Debug code to track any issues.

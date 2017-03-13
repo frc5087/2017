@@ -36,7 +36,7 @@ public class Vision
 
 	Robot	robot_;
 	
-	Thread	visionThread_;
+	Thread	visionProcess_;
 
 	/*
 	 * Constructor.
@@ -65,7 +65,7 @@ public class Vision
 
 		// Thread to process the image.
 
-        visionThread_ = new Thread(() ->
+        visionProcess_ = new Thread(() ->
         {
             while(!Thread.interrupted())
         	{
@@ -94,8 +94,8 @@ public class Vision
         	}
         });
         
-		visionThread_.setDaemon(true);
-		visionThread_.start();
+		visionProcess_.setDaemon(true);
+		visionProcess_.start();
 
 		// Request a new image to start the processing.
 		
