@@ -96,6 +96,8 @@ public class MotorControl
 		StringBuilder sb = new StringBuilder();
 
 		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		
+		_talon.reverseSensor(true);
 
 		// Percent voltage mode.
 
@@ -116,9 +118,7 @@ public class MotorControl
 
 		while(Timer.getFPGATimestamp() < start)
 		{
-			// TODO Double check this is really RPM as the API says it's native units.
-			
-			rpm = rpm + _talon.getSpeed();	// _talon.getAnalogInVelocity();
+			rpm = rpm + _talon.getSpeed();
 
 			++rpmcount;
 		}
@@ -146,17 +146,36 @@ public class MotorControl
 		sb.setLength(0);
 	*/
 		
-		
-		
-		
+	/*	
 		_talon.setProfile(_slot);
 		
 		_talon.setF(0);
 		_talon.setP(0);
 		_talon.setI(0);
 		_talon.setD(0);
-		_talon.setMotionMagicCruiseVelocity(453); /* 453 RPM */
-		_talon.setMotionMagicAcceleration(453); /* 453 RPM per second */		
+		_talon.setMotionMagicCruiseVelocity(453);
+		_talon.setMotionMagicAcceleration(453);
+	*/
+		
+	/*
+
+-> test()
+Warning: sensor direction not correct.
+Left +ve
+RPM:190.48635537701435
+Warning: sensor direction not correct.
+Left -ve
+RPM:190.2341896437771
+Warning: sensor direction not correct.
+Right +ve
+RPM:187.91177266278683
+Warning: sensor direction not correct.
+Right -ve
+RPM:196.22088342636326
+<- test()
+
+	*/
+
 	}
 
 	/*
