@@ -445,6 +445,8 @@ public class Robot extends SampleRobot
         {
         	moveRobot();
         	
+        	slowMove();
+        	
         	dropGear();
         	
         	switchCamera();
@@ -542,7 +544,46 @@ public class Robot extends SampleRobot
         	}
     	}
     }
+
+    /*
+     * Allow slow movement.
+     */
     
+    public void slowMove()
+    {
+    	if((InstalledHardware.JOYSTICK == true)
+    	&& (InstalledHardware.DRIVE == true))
+    	{
+        	switch(joystick_.getPOV(0))
+        	{
+        		case 45 :
+        		case 90 :
+        		case 135 :
+        		{
+            		drive_.arcadeDrive(0.0, -0.45f, true);
+
+        			break;
+        		}
+        		
+        		case 225 :
+        		case 270 :
+        		case 315 :
+        		{
+            		drive_.arcadeDrive(0.0, +0.55f, true);
+
+            		break;
+        		}
+        		
+        		default :
+        		{
+//        			System.out.println(controller.getPOV(0));
+        			
+        			break;
+        		}
+        	}
+    	}
+    }
+
 	/*
 	 * If the <A> button is pressed and held, open the gear/cog holder, otherwise
 	 * close the gear/cog holder.
