@@ -1,7 +1,10 @@
 package org.usfirst.frc.team5087.robot;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
+
+import edu.wpi.first.wpilibj.Timer;
 
 public class MotorControl
 {
@@ -12,6 +15,12 @@ public class MotorControl
     
 	CANTalon[]	talons_ = new CANTalon[4];
 
+	/*
+	 * Main constructor.
+	 * 
+	 * Allocates and sets up the Talon motor controllers for driving the robot. 
+	 */
+	
 	MotorControl()
 	{
     	// Motor controllers for the robot movement.
@@ -38,20 +47,133 @@ public class MotorControl
 
         	for(int i = 0; i < 4; ++i)
         	{
-            	talons_[i].configMaxOutputVoltage(12.0);
-            	talons_[i].configNominalOutputVoltage(12.0, 12.0);
-            	talons_[i].configPeakOutputVoltage(12.0, 12.0);
+            	talons_[i].configMaxOutputVoltage(12.0f);
+            	talons_[i].configNominalOutputVoltage(0.0f, 0.0f);
+            	talons_[i].configPeakOutputVoltage(12.0f, 12.0f);
         	}
     	}
 	}
+	
+	/*
+	 * Return the Talon that controls the left hand side motors.
+	 */
 	
 	CANTalon left()
 	{
 		return talons_[LEFT_MASTER];
 	}
+
+	/*
+	 * Return the Talon that controls the right hand side motors.
+	 */
 	
 	CANTalon right()
 	{
 		return talons_[RIGHT_MASTER];
+	}
+
+	/*
+	 * Calculate the PID values for the left and right motors.
+	 * 
+	 * @param	_talon			Talon SRX to configure.
+	 * @param	_slot			Talon SRX slot to store results in.
+	 * @param	_direction		-1 for backwards and +1 for forwards.
+	 */
+	
+	static final int	SENSOR_ROTATION	= 4096;			// Ticks per single rotation of the sensor.
+	static final int	ROTATION_TIME		= 100;			// 100ms.
+	
+	void configure(CANTalon _talon, int _slot, int _direction)
+	{
+		double	F = 0.0f;				// Feed Forward Gain.
+		double	P = 0.0f;
+		double	I = 0.0f;
+		double	D = 0.0f;
+		
+		double	MMCV	= 0.0f;			// Motion Magic Cruise Velocity.
+		double	MMA		= 0.0f;			// Motion Magic Acceleration.
+		
+		StringBuilder sb = new StringBuilder();
+
+		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+
+		// Percent voltage mode.
+
+		_talon.changeControlMode(TalonControlMode.PercentVbus);
+
+		// Set full power, either forwards or backwards.
+		
+		_talon.set((double) _direction);
+
+		wait(500);
+		
+		// Run the motor for 10 seconds and grab the average RPM.
+
+		double	rpm		 = 0.0f;
+		int		rpmcount = 0;
+
+		double	start = Timer.getFPGATimestamp() + 5;
+
+		while(Timer.getFPGATimestamp() < start)
+		{
+			// TODO Double check this is really RPM as the API says it's native units.
+			
+			rpm = rpm + _talon.getSpeed();	// _talon.getAnalogInVelocity();
+
+			++rpmcount;
+		}
+		
+		// Check the sensor is in the correct direction.
+		
+		if(Math.signum(rpm) != Math.signum((double) _direction))
+		{
+			System.out.println("Warning: sensor direction not correct.");
+		}
+
+		// Calculate the simple average of all the RPM values (TODO Do we need the +ve value only?).
+		
+		rpm = Math.abs(rpm / rpmcount);
+		
+		System.out.println("RPM:" + rpm);
+
+		_talon.set(0.0f);
+
+		wait(500);
+
+	/*
+		sb.append("\tout:");
+    	System.out.println(sb.toString());
+		sb.setLength(0);
+	*/
+		
+		
+		
+		
+		_talon.setProfile(_slot);
+		
+		_talon.setF(0);
+		_talon.setP(0);
+		_talon.setI(0);
+		_talon.setD(0);
+		_talon.setMotionMagicCruiseVelocity(453); /* 453 RPM */
+		_talon.setMotionMagicAcceleration(453); /* 453 RPM per second */		
+	}
+
+	/*
+	 * Wait for a number of ms.
+	 */
+	
+	void wait(int _for)
+	{
+		try
+		{
+			Thread.sleep(_for);
+		}
+		
+		catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+
 	}
 }
