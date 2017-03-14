@@ -471,6 +471,12 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> test()");
     	
+    	motor_.configure(motor_.left(), 0, +1);
+    	motor_.configure(motor_.left(), 0, -1);
+
+    	motor_.configure(motor_.right(), 0, +1);
+    	motor_.configure(motor_.right(), 0, -1);
+
     	System.out.println("<- test()");
     }
 
@@ -676,7 +682,7 @@ public class Robot extends SampleRobot
     			
     			case CLIMB_CLIMBING :
     			{
-            		if(current >= 15.0)
+            		if(current >= 17.0)
             		{
             			climbState_ = CLIMB_STOPPED;
             			
