@@ -471,11 +471,23 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> test()");
     	
-    	motor_.configure(motor_.left(), 0, +1);
-    	motor_.configure(motor_.left(), 0, -1);
+    	double[]	rpm = new double[4];
+    	
+    	rpm[0] = motor_.RPM(motor_.left(), 0, +1);
+    	rpm[1] = motor_.RPM(motor_.left(), 0, -1);
+    	rpm[2] = motor_.RPM(motor_.right(), 0, +1);
+    	rpm[3] = motor_.RPM(motor_.right(), 0, -1);
 
-    	motor_.configure(motor_.right(), 0, +1);
-    	motor_.configure(motor_.right(), 0, -1);
+    	double	min = 999.0f;
+    	double	max = 0.0f;
+
+    	for(int i = 0; i < 4; ++i)
+    	{
+    		if(rpm[i] > max) max = rpm[i];
+    		if(rpm[i] < min) min = rpm[i];
+    	}
+    	
+    	motor_.configure(motor_.left(), 0, min);
 
     	System.out.println("<- test()");
     }

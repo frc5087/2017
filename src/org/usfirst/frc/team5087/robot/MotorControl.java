@@ -73,28 +73,15 @@ public class MotorControl
 	}
 
 	/*
-	 * Calculate the PID values for the left and right motors.
+	 * Calculate and return the RPM value at full speed.
 	 * 
 	 * @param	_talon			Talon SRX to configure.
 	 * @param	_slot			Talon SRX slot to store results in.
 	 * @param	_direction		-1 for backwards and +1 for forwards.
 	 */
 	
-	static final int	SENSOR_ROTATION	= 4096;			// Ticks per single rotation of the sensor.
-	static final int	ROTATION_TIME		= 100;			// 100ms.
-	
-	void configure(CANTalon _talon, int _slot, int _direction)
+	double RPM(CANTalon _talon, int _slot, int _direction)
 	{
-		double	F = 0.0f;				// Feed Forward Gain.
-		double	P = 0.0f;
-		double	I = 0.0f;
-		double	D = 0.0f;
-		
-		double	MMCV	= 0.0f;			// Motion Magic Cruise Velocity.
-		double	MMA		= 0.0f;			// Motion Magic Acceleration.
-		
-		StringBuilder sb = new StringBuilder();
-
 		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
 		_talon.reverseSensor(true);
@@ -107,9 +94,9 @@ public class MotorControl
 		
 		_talon.set((double) _direction);
 
-		wait(500);
+		wait(250);
 		
-		// Run the motor for 10 seconds and grab the average RPM.
+		// Run the motor for 5 seconds and grab the average RPM.
 
 		double	rpm		 = 0.0f;
 		int		rpmcount = 0;
@@ -136,9 +123,73 @@ public class MotorControl
 		
 		System.out.println("RPM:" + rpm);
 
+		// Stop the motor running for the moment.
+		
 		_talon.set(0.0f);
 
-		wait(500);
+		wait(250);
+
+		return rpm;
+	}
+
+	/*
+	 * Configure the Talon.
+	 * 
+	 * @param	_talon			Talon SRX to configure.
+	 * @param	_slot			Talon SRX slot to store results in.
+	 * @param	_rpm			Max RPM to run at.
+	 */
+	
+	static final int	RATE		= 4096;						// Ticks per single rotation.
+	static final int	NATIVE		= 100;						// 100ms.
+	static final int	DIVIDER	= 60 * (1000 / NATIVE);
+	
+	void configure(CANTalon _talon, int _slot, double _rpm)
+	{
+		double	F = (_rpm * RATE) / DIVIDER;					// Feed Forward Gain.
+		double	P = 0.0f;
+		double	I = 0.0f;
+		double	D = 0.0f;
+		
+		double	MMCV	= _rpm * 0.90f;							// Motion Magic Cruise Velocity (90%).
+		double	MMA		= _rpm * 0.90f;							// Motion Magic Acceleration (90%).
+		
+		StringBuilder sb = new StringBuilder();
+
+		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		
+		_talon.reverseSensor(true);
+		
+		save(_talon, _slot, F, P, I, D, MMCV, MMA);
+
+		_talon.setPosition(0.0f);
+
+		_talon.changeControlMode(TalonControlMode.MotionMagic);
+		_talon.set(RATE * 4);									// Rotate to position.
+
+	/*	
+		// Run the motor for 5 seconds and grab the average RPM.
+
+		double	rpm		 = 0.0f;
+		int		rpmcount = 0;
+
+		double	start = Timer.getFPGATimestamp() + 5;
+
+		while(Timer.getFPGATimestamp() < start)
+		{
+			rpm = rpm + _talon.getSpeed();
+
+			++rpmcount;
+		}
+	*/
+		
+		// We're done - turn the motor off.
+		
+		_talon.changeControlMode(TalonControlMode.PercentVbus);
+
+		_talon.set(0.0f);
+
+		wait(250);
 
 	/*
 		sb.append("\tout:");
@@ -147,37 +198,37 @@ public class MotorControl
 	*/
 		
 	/*	
-		_talon.setProfile(_slot);
 		
-		_talon.setF(0);
-		_talon.setP(0);
-		_talon.setI(0);
-		_talon.setD(0);
-		_talon.setMotionMagicCruiseVelocity(453);
-		_talon.setMotionMagicAcceleration(453);
 	*/
-		
-	/*
-
--> test()
-Warning: sensor direction not correct.
-Left +ve
-RPM:190.48635537701435
-Warning: sensor direction not correct.
-Left -ve
-RPM:190.2341896437771
-Warning: sensor direction not correct.
-Right +ve
-RPM:187.91177266278683
-Warning: sensor direction not correct.
-Right -ve
-RPM:196.22088342636326
-<- test()
-
-	*/
-
 	}
 
+	/*
+	 * Save the configuration information to the correct slot.
+	 * 
+	 * @param	_talon
+	 * @param	_slot
+	 * @param	_F
+	 * @param	_P
+	 * @param	_I
+	 * @param	_D
+	 * @param	_MMCV
+	 * @param	_MMA
+	 */
+	
+	void save(CANTalon _talon, int _slot,
+			  double _F, double _P, double _I, double _D, double _MMCV, double _MMA)
+	{
+		_talon.setProfile(_slot);
+
+		_talon.setF(_F);
+		_talon.setP(_P);
+		_talon.setI(_I);
+		_talon.setD(_D);
+		
+		_talon.setMotionMagicCruiseVelocity(_MMCV);
+		_talon.setMotionMagicAcceleration(_MMA);
+	}
+	
 	/*
 	 * Wait for a number of ms.
 	 */
