@@ -86,7 +86,7 @@ public class Vision
 						Thread.sleep(50);
 					}
             		
-            		catch (InterruptedException e)
+            		catch(InterruptedException e)
             		{
 						e.printStackTrace();
 					}
