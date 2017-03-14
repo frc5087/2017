@@ -2,7 +2,6 @@
 package org.usfirst.frc.team5087.robot;
 
 import com.ctre.CANTalon;
-import com.ctre.CANTalon.TalonControlMode;
 
 import java.util.Stack;
 
