@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 
 public class SpokeSensor
 {
-	static final boolean	SHOW_VOLTAGE	= true;
+	static final boolean	SHOW_VOLTAGE	= false;
 	static final boolean SHOW_SPOKES	= true;
 	static final boolean SHOW_TEETH		= false;
 	
