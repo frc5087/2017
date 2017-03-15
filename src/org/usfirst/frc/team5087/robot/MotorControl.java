@@ -83,15 +83,11 @@ public class MotorControl
 	double RPM(CANTalon _talon, int _slot, int _direction)
 	{
 		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		
 		_talon.reverseSensor(true);
 
 		// Percent voltage mode.
 
 		_talon.changeControlMode(TalonControlMode.PercentVbus);
-
-		// Set full power, either forwards or backwards.
-		
 		_talon.set((double) _direction);
 
 		wait(250);
@@ -101,7 +97,7 @@ public class MotorControl
 		double	rpm		 = 0.0f;
 		int		rpmcount = 0;
 
-		double	start = Timer.getFPGATimestamp() + 5;
+		double	start = Timer.getFPGATimestamp() + 5.0f;
 
 		while(Timer.getFPGATimestamp() < start)
 		{
@@ -117,7 +113,7 @@ public class MotorControl
 			System.out.println("Warning: sensor direction not correct.");
 		}
 
-		// Calculate the simple average of all the RPM values (TODO Do we need the +ve value only?).
+		// Calculate the simple average of all the RPM values.
 		
 		rpm = Math.abs(rpm / rpmcount);
 		
@@ -146,60 +142,92 @@ public class MotorControl
 	
 	void configure(CANTalon _talon, int _slot, double _rpm)
 	{
-		double	F = (_rpm * RATE) / DIVIDER;					// Feed Forward Gain.
+		double	F = (_rpm * RATE) / DIVIDER;					// See section 12.8.3.
 		double	P = 0.0f;
 		double	I = 0.0f;
 		double	D = 0.0f;
 		
-		double	MMCV	= _rpm * 0.90f;							// Motion Magic Cruise Velocity (90%).
-		double	MMA		= _rpm * 0.90f;							// Motion Magic Acceleration (90%).
-		
-		StringBuilder sb = new StringBuilder();
+		double	MMCV	= _rpm * 0.90f;							// See section 12.8.4.
+		double	MMA		= _rpm * 0.90f;							// See section 12.8.4.
+
+		double	error;
 
 		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		_talon.reverseSensor(false);
+
+		// Run the first time to allow the first calculation of "P".
 		
-		_talon.reverseSensor(true);
+		System.out.println("Finding P ...");
 		
-		save(_talon, _slot, F, P, I, D, MMCV, MMA);
+		configureSlot(_talon, _slot, F, P, I, D, MMCV, MMA);
 
-		_talon.setPosition(0.0f);
-
-		_talon.changeControlMode(TalonControlMode.MotionMagic);
-		_talon.set(RATE * 4);									// Rotate to position.
-
-	/*	
-		// Run the motor for 5 seconds and grab the average RPM.
-
-		double	rpm		 = 0.0f;
-		int		rpmcount = 0;
-
-		double	start = Timer.getFPGATimestamp() + 5;
-
-		while(Timer.getFPGATimestamp() < start)
+		error = runMotionMagic(_talon);
+		
+		if(error == 0.0f)
 		{
-			rpm = rpm + _talon.getSpeed();
-
-			++rpmcount;
+			System.out.println("Stopped");
+			
+			return;
 		}
-	*/
 		
+		P = (0.10f * 1023) / error;								// See section 12.8.5.
+
+		// Run a few times to calculate the correct value of P.
+		
+		for(int i = 0; i < 10; ++i)
+		{
+			configureSlot(_talon, _slot, F, P, I, D, MMCV, MMA);
+
+			error = runMotionMagic(_talon);
+
+			if(error == 0.0f)
+			{
+				System.out.println("Stopped");
+				
+				return;
+			}
+
+			P = P * 2.0f;
+		}
+
+		// Calculate the value of "D".
+
+		System.out.println("Finding D ...");
+
+		D = P * 10.0f;											// See section 12.8.6.
+
+//		configureSlot(_talon, _slot, F, P, I, D, MMCV, MMA);
+
+//		error = runMotionMagic(_talon);
+
+		// Now figure out what the "I" value needs to be - we want the error to be zero at the point.
+
+		System.out.println("Finding I ...");
+
+		_talon.setIZone(50);
+
+		I = 0.001f;												// See section 12.8.7.
+
+		while(true)
+		{
+			configureSlot(_talon, _slot, F, P, I, D, MMCV, MMA);
+
+			error = runMotionMagic(_talon);
+			
+			if(error < 1.0f)
+			{
+				break;
+			}
+			
+			I = I * 2.0f;		
+		}
+			
 		// We're done - turn the motor off.
 		
 		_talon.changeControlMode(TalonControlMode.PercentVbus);
-
 		_talon.set(0.0f);
 
 		wait(250);
-
-	/*
-		sb.append("\tout:");
-    	System.out.println(sb.toString());
-		sb.setLength(0);
-	*/
-		
-	/*	
-		
-	*/
 	}
 
 	/*
@@ -215,8 +243,8 @@ public class MotorControl
 	 * @param	_MMA
 	 */
 	
-	void save(CANTalon _talon, int _slot,
-			  double _F, double _P, double _I, double _D, double _MMCV, double _MMA)
+	void configureSlot(CANTalon _talon, int _slot,
+						double _F, double _P, double _I, double _D, double _MMCV, double _MMA)
 	{
 		_talon.setProfile(_slot);
 
@@ -227,6 +255,50 @@ public class MotorControl
 		
 		_talon.setMotionMagicCruiseVelocity(_MMCV);
 		_talon.setMotionMagicAcceleration(_MMA);
+		
+		System.out.println("F:" + _F +
+						   " P:" + _P + " I:" + _I + " D:" + _D +
+						   " MMCV:" + _MMCV + " MMA:" + _MMA);
+	}
+
+	/*
+	 * Run the Motion Magic profile for at least 5 seconds, or if the position is good, earlier.
+	 */
+
+	static final double	POSITION	= 4.0f;
+
+	double runMotionMagic(CANTalon _talon)
+	{
+		_talon.setPosition(0.0f);
+
+		// This appears to be a number of rotations of the wheel.
+		
+		_talon.changeControlMode(TalonControlMode.MotionMagic);
+		_talon.set(POSITION);
+
+		// TODO how do we know when it's finished?
+
+		double	start = Timer.getFPGATimestamp() + 4.0f;
+
+		System.out.println("Locating ...");
+		
+		double error = 0.0f;
+		
+		while(Timer.getFPGATimestamp() < start)
+		{
+			System.out.println("pos:" + _talon.getEncPosition());
+			
+//			error = POSITION - (_talon.getEncPosition() / 4096.0f);
+			
+//			if(error < 10.0f)
+//			{
+//				break;
+//			}
+		}
+		
+		System.out.println("ERR:" + error + " CLERR:" + _talon.getClosedLoopError());
+	
+		return _talon.getClosedLoopError();
 	}
 	
 	/*
