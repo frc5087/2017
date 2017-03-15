@@ -422,7 +422,7 @@ public class Robot extends SampleRobot
     	{
     		drive_.setSafetyEnabled(true);
         
-        	double	start = Timer.getFPGATimestamp() + 5.0f;
+        	double	start = Timer.getFPGATimestamp() + 3.0f;
 
     		while((isEnabled()) && (Timer.getFPGATimestamp() < start))
     		{
