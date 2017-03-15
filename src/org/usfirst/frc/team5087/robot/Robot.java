@@ -219,8 +219,7 @@ public class Robot extends SampleRobot
         		cvFrontSink_.setEnabled(true);
             	cvFrontSink_.setSource(usbFrontCamera_);
             	
-                /*
-                
+            /*
                 // Grab the JSON file and save into a table for this.
 
                 VideoProperty camera0[] = usbFrontCamera_.enumerateProperties();
@@ -229,7 +228,7 @@ public class Robot extends SampleRobot
                 {
                 	
                 }
-                */
+            */
 
             	vision_ = new Vision(this);
         	}
