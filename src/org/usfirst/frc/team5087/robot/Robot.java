@@ -422,18 +422,18 @@ public class Robot extends SampleRobot
     	if(InstalledHardware.DRIVE == true)
     	{
     		drive_.setSafetyEnabled(true);
-    	}
         
-    	double	start = Timer.getFPGATimestamp() + 5.0f;
+        	double	start = Timer.getFPGATimestamp() + 5.0f;
 
-		while((isEnabled()) && (Timer.getFPGATimestamp() < start))
-		{
-        	drive_.arcadeDrive(+1.0f, 0.0f, true);
+    		while((isEnabled()) && (Timer.getFPGATimestamp() < start))
+    		{
+            	drive_.arcadeDrive(+1.0f, 0.0f, true);
 
-        	Timer.delay(0.005);
-		}
+            	Timer.delay(0.01);
+    		}
 
-    	drive_.arcadeDrive(0.0f, 0.0f, true);
+        	drive_.arcadeDrive(0.0f, 0.0f, true);
+    	}
 
     	System.out.println("<- autonomous()");
     }
