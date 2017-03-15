@@ -6,6 +6,12 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * MotorControl class for the CANTalon motors.
+ * 
+ * @author	James Fisher
+ */
+
 public class MotorControl
 {
     static final int	LEFT_MASTER	= 0;
@@ -54,8 +60,10 @@ public class MotorControl
     	}
 	}
 	
-	/*
+	/**
 	 * Return the Talon that controls the left hand side motors.
+	 * 
+	 * @return	CANTalon object for left motor output.
 	 */
 	
 	CANTalon left()
@@ -63,8 +71,10 @@ public class MotorControl
 		return talons_[LEFT_MASTER];
 	}
 
-	/*
+	/**
 	 * Return the Talon that controls the right hand side motors.
+	 * 
+	 * @return	CANTalon object for right motor output.
 	 */
 	
 	CANTalon right()
@@ -72,12 +82,14 @@ public class MotorControl
 		return talons_[RIGHT_MASTER];
 	}
 
-	/*
+	/**
 	 * Calculate and return the RPM value at full speed.
 	 * 
-	 * @param	_talon			Talon SRX to configure.
-	 * @param	_slot			Talon SRX slot to store results in.
-	 * @param	_direction		-1 for backwards and +1 for forwards.
+	 * @param	_talon		Talon SRX to configure.
+	 * @param	_slot		Talon SRX slot to store results in.
+	 * @param	_direction	-1 for backwards and +1 for forwards.
+	 * 
+	 * @return				Average RPM of the motor output.
 	 */
 	
 	double RPM(CANTalon _talon, int _slot, int _direction)
@@ -128,12 +140,12 @@ public class MotorControl
 		return rpm;
 	}
 
-	/*
+	/**
 	 * Configure the Talon.
 	 * 
-	 * @param	_talon			Talon SRX to configure.
-	 * @param	_slot			Talon SRX slot to store results in.
-	 * @param	_rpm			Max RPM to run at.
+	 * @param	_talon	Talon SRX to configure.
+	 * @param	_slot	Talon SRX slot to store results in.
+	 * @param	_rpm	Max RPM to run at.
 	 */
 	
 	static final int	RATE		= 4096;						// Ticks per single rotation.
@@ -234,7 +246,7 @@ public class MotorControl
 		wait(250);
 	}
 
-	/*
+	/**
 	 * Save the configuration information to the correct slot.
 	 * 
 	 * @param	_talon
@@ -265,24 +277,22 @@ public class MotorControl
 						   " MMCV:" + _MMCV + " MMA:" + _MMA);
 	}
 
-	/*
-	 * Run the Motion Magic profile for at least 5 seconds, or if the position is good, earlier.
+	/**
+	 * Run the Motion Magic profile for a few seconds, or if the position is good, earlier.
+	 * 
+	 * @param	_talon	Talon to run the Motion Magic on.
+	 * 
+	 * @return			Value of getClosedLoopError().
 	 */
 
 	static final double	POSITION	= 4.0f;
 
-	double runMotionMagic(CANTalon _talon)
+	int runMotionMagic(CANTalon _talon)
 	{
 		_talon.setPosition(0.0f);
 
-		// This appears to be a number of rotations of the wheel.
-		
 		_talon.changeControlMode(TalonControlMode.MotionMagic);
-		_talon.set(POSITION);										// Number of rotations.
-
-		// TODO how do we know when it's finished?
-
-		System.out.println("Locating ...");
+		_talon.set(POSITION);										// Number of wheel rotations.
 
 		int		count = 0;
 		
@@ -300,8 +310,8 @@ public class MotorControl
 				_talon.getBusVoltage()			// Input voltage. 
 			);
 		}
-	
-		return 0.0f;
+
+		return _talon.getClosedLoopError();
 	}
 	
 	/*
