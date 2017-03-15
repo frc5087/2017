@@ -505,7 +505,7 @@ public class Robot extends SampleRobot
     	min = 192.0f;
     	
     	motor_.configure(motor_.left(), 0, min);
-    //	motor_.configure(motor_.right(), 0, min);
+    	motor_.configure(motor_.right(), 0, min);
 
     	System.out.println("<- test()");
     }
