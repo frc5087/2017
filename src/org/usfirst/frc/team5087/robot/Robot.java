@@ -418,11 +418,23 @@ public class Robot extends SampleRobot
     public void autonomous()
     {
     	System.out.println("-> autonomous()");
+
+    	if(InstalledHardware.DRIVE == true)
+    	{
+    		drive_.setSafetyEnabled(true);
+    	}
         
-        while(isEnabled())
-        {
-        }
-        
+    	double	start = Timer.getFPGATimestamp() + 5.0f;
+
+		while((isEnabled()) && (Timer.getFPGATimestamp() < start))
+		{
+        	drive_.arcadeDrive(+1.0f, 0.0f, true);
+
+        	Timer.delay(0.005);
+		}
+
+    	drive_.arcadeDrive(0.0f, 0.0f, true);
+
     	System.out.println("<- autonomous()");
     }
 
@@ -472,7 +484,11 @@ public class Robot extends SampleRobot
     public void test()
     {
     	System.out.println("-> test()");
-    	
+
+    	double	min = 999.0f;
+    	double	max = 0.0f;
+
+    /*
     	double[]	rpm = new double[4];
     	
     	rpm[0] = motor_.RPM(motor_.left(), 0, +1);
@@ -480,16 +496,17 @@ public class Robot extends SampleRobot
     	rpm[2] = motor_.RPM(motor_.right(), 0, +1);
     	rpm[3] = motor_.RPM(motor_.right(), 0, -1);
 
-    	double	min = 999.0f;
-    	double	max = 0.0f;
-
     	for(int i = 0; i < 4; ++i)
     	{
     		if(rpm[i] > max) max = rpm[i];
     		if(rpm[i] < min) min = rpm[i];
     	}
+    */
+    	
+    	min = 192.0f;
     	
     	motor_.configure(motor_.left(), 0, min);
+    //	motor_.configure(motor_.right(), 0, min);
 
     	System.out.println("<- test()");
     }
