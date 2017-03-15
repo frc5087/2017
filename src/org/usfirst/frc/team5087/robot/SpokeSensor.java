@@ -45,6 +45,7 @@ public class SpokeSensor
 	 * Return the angle of the spoke, or -1 if spoke not found. 
 	 */
 	
+	@SuppressWarnings("unused")
 	public double position()
 	{
 		if(SHOW_VOLTAGE == true)
