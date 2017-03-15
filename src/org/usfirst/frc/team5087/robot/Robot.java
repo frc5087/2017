@@ -13,7 +13,6 @@ import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -39,15 +38,6 @@ public class Robot extends SampleRobot
     static final int CLIMB_CLIMBING	= 2;
     static final int CLIMB_STOPPED	= 3;
 
-    double angleSetpoint = 0.0;
-    
-    final double pGain = .006; //proportional turning constant
-
-    //gyro calibration constant, may need to be adjusted;
-    //gyro value of 360 is set to correspond to one full revolution
-    
-    final double voltsPerDegreePerSecond = .0128;
-    
     Vision				vision_;
     
     SpokeSensor			spokesensor_;
@@ -81,7 +71,6 @@ public class Robot extends SampleRobot
 
     MotorControl		motor_;
     RamsRobotDrive		drive_;
-    AnalogGyro			gyro_;
     Joystick			joystick_;
     Solenoid			drop_;
 
@@ -139,16 +128,6 @@ public class Robot extends SampleRobot
     		spokesensor_ = new SpokeSensor();
     	}
 
-        // Variables for the gyro.
-
-    	if(InstalledHardware.GYROSCOPE == true)
-    	{
-            gyro_ = new AnalogGyro(0);
-            
-            gyro_.initGyro();
-            gyro_.reset();
-    	}
-    	
         // Allocate a new joystick for the robot control.
 
     	if(InstalledHardware.JOYSTICK == true)
@@ -219,17 +198,6 @@ public class Robot extends SampleRobot
         		cvFrontSink_.setEnabled(true);
             	cvFrontSink_.setSource(usbFrontCamera_);
             	
-            /*
-                // Grab the JSON file and save into a table for this.
-
-                VideoProperty camera0[] = usbFrontCamera_.enumerateProperties();
-
-                for(int i = camera0.length(); ++i)
-                {
-                	
-                }
-            */
-
             	vision_ = new Vision(this);
         	}
             
@@ -420,18 +388,6 @@ public class Robot extends SampleRobot
 
     	if(InstalledHardware.DRIVE == true)
     	{
-    		drive_.setSafetyEnabled(true);
-        
-        	double	start = Timer.getFPGATimestamp() + 2.0f;
-
-    		while((isEnabled()) && (Timer.getFPGATimestamp() < start))
-    		{
-            	drive_.arcadeDrive(+1.0f, 0.0f, true);
-
-            	Timer.delay(0.01);
-    		}
-
-        	drive_.arcadeDrive(0.0f, 0.0f, true);
     	}
 
     	System.out.println("<- autonomous()");
@@ -527,12 +483,6 @@ public class Robot extends SampleRobot
     @SuppressWarnings("unused")
 	private void moveRobot()
     {
-//      double turningValue;
-        
-//      gyro.setSensitivity(voltsPerDegreePerSecond); //calibrates gyro values to equal degrees
-
-//    	turningValue =  (angleSetpoint - gyro.getAngle()) * pGain;
-
     	if(InstalledHardware.DRIVE == true)
     	{
         	switch(cameraInUse_)
