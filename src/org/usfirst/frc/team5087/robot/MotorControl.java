@@ -157,7 +157,7 @@ public class MotorControl
 
 		// Run the first time to allow the first calculation of "P".
 		
-		System.out.println("Finding P ...");
+		System.out.println(_talon.getDescription() + " - finding P ...");
 		
 		configureSlot(_talon, _slot, F, P, I, D, MMCV, MMA);
 
@@ -169,6 +169,8 @@ public class MotorControl
 			
 			return;
 		}
+
+	/*	
 		
 		P = (0.10f * 1023) / error;								// See section 12.8.5.
 
@@ -221,7 +223,9 @@ public class MotorControl
 			
 			I = I * 2.0f;		
 		}
-			
+		
+	*/
+		
 		// We're done - turn the motor off.
 		
 		_talon.changeControlMode(TalonControlMode.PercentVbus);
@@ -274,31 +278,30 @@ public class MotorControl
 		// This appears to be a number of rotations of the wheel.
 		
 		_talon.changeControlMode(TalonControlMode.MotionMagic);
-		_talon.set(POSITION);
+		_talon.set(POSITION);										// Number of rotations.
 
 		// TODO how do we know when it's finished?
 
-		double	start = Timer.getFPGATimestamp() + 4.0f;
-
 		System.out.println("Locating ...");
+
+		int		count = 0;
 		
-		double error = 0.0f;
-		
+		double	start = Timer.getFPGATimestamp() + 4.0f;			// Run for about 4 seconds.
+
 		while(Timer.getFPGATimestamp() < start)
 		{
-			System.out.println("pos:" + _talon.getEncPosition());
-			
-//			error = POSITION - (_talon.getEncPosition() / 4096.0f);
-			
-//			if(error < 10.0f)
-//			{
-//				break;
-//			}
+			System.out.printf("%d,%d,%d,%d,%f,%f,%f,%f\n", ++count,
+				_talon.getEncPosition(),		// Encoder position.
+				_talon.getEncVelocity(),		// Encoder velocity.
+				_talon.getClosedLoopError(),	// Closed loop error.
+				_talon.getError(),				// Difference between set pos and current pos.
+				_talon.getSpeed(),				// Motor RPM.
+				_talon.getOutputVoltage(),		// Output voltage to motor.
+				_talon.getBusVoltage()			// Input voltage. 
+			);
 		}
-		
-		System.out.println("ERR:" + error + " CLERR:" + _talon.getClosedLoopError());
 	
-		return _talon.getClosedLoopError();
+		return 0.0f;
 	}
 	
 	/*
