@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /*
@@ -388,6 +389,8 @@ public class Robot extends SampleRobot
     	
    		if((one = true) && (two == true))
    		{
+   			motor_.allDone();
+   			
     		ret = true;
     	}
     
@@ -404,7 +407,7 @@ public class Robot extends SampleRobot
     {
 		while(isEnabled() && ((areWeThereYet() == false)))
     	{
-            Timer.delay(0.005);
+            Timer.delay(0.005f);
     	}
 
 		return isEnabled();
@@ -478,13 +481,15 @@ public class Robot extends SampleRobot
     		
     		case '2' :
     		{
-    			motor_.move(2840.0f - (787.4f / 2.0f) - (787.4f / 2.0f), RPM);
+    			motor_.move(2840.0f - 393.0f - 393.0f, 250.0f);
     			
     			if(done() == false) break;
     			
         		drop_.set(true);
+        		
+        		Timer.delay(0.5f);
 
-    			motor_.move(-1146.0f, RPM / 2.0f);
+    			motor_.move(-2840.0f - 393.0f - 393.0f - 400.0f, 125.0f);
 
     			if(done() == false) break;
 
@@ -577,6 +582,8 @@ public class Robot extends SampleRobot
         	motor_.setup(false);
     	}
 
+    	Scheduler.getInstance().removeAll();
+    	
         while(isOperatorControl() && isEnabled())
         {
         	moveRobot();
@@ -613,12 +620,12 @@ public class Robot extends SampleRobot
 
     	motor_.setup(true);
     	
-    	motor_.rotate(+90.0f, RPM);
+    	motor_.rotate(+90.0f, RPM / 2.0f);
 //    	motor_.move(+500.0f, 200.0f);
 
     	done();
 
-    	motor_.rotate(-90.0f, RPM);
+    	motor_.rotate(-90.0f, RPM / 2.0f);
 //    	motor_.move(-500.0f, 200.0f);
 
     	done();
