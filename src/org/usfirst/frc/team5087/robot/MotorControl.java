@@ -296,6 +296,8 @@ public class MotorControl
 	    
 	    right().changeControlMode(TalonControlMode.PercentVbus);
 	    right().set(right);
+	    
+	    System.out.println("L:" + left().getSpeed() + " R:" + right().getSpeed());
 	}
 
 	/**
@@ -366,21 +368,21 @@ public class MotorControl
 	 * @param	_rpm	Max RPM to run at.
 	 */
 	
-	static final double	RATE		= 4096.0f;					// Ticks per single rotation.
-	static final double	NATIVE		= 100.0f;					// 100ms.
+	static final double	RATE		= 4096.0f;				// Ticks per single rotation.
+	static final double	NATIVE		= 100.0f;				// 100ms.
 	static final double	DIVIDER	= 60.0f * (1000.0f / NATIVE);
 	
 	void configure(int _talon, int _slot, double _rpm)
 	{
 		double	F = 1023.0f / ((_rpm * RATE) / DIVIDER);		// See section 12.8.3.
-		double	P = 3.0f;
+		double	P = 6.0f;
 		double	I = 0.0001f;
 		double	D = P * 10.0f;
 
 		int		IZ= 50;
 		
-		double	MMCV	= _rpm * 1.0f;							// See section 12.8.4.
-		double	MMA		= _rpm * 1.0f;							// See section 12.8.4.
+		double	MMCV	= _rpm * 1.00f;							// See section 12.8.4.
+		double	MMA		= _rpm * 1.00f;							// See section 12.8.4.
 
 		configureSlot(_talon, _slot, F, P, I, D, IZ, MMCV, MMA);
 		
