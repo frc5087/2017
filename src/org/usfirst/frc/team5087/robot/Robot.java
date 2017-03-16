@@ -429,130 +429,134 @@ public class Robot extends SampleRobot
     	String	command = SmartDashboard.getString("DB/String 0", "?").toLowerCase();
     	
     	System.out.println(command);
+    	
+    	double adj = +1.0f;
 
-    	if(command.charAt(0) == 'r')
+    	if(command.charAt(0) == 'b')
     	{
-        	switch(command.charAt(1))
-        	{
-        		case '1' :
-        		{
-        			motor_.move(2614.0f - 393.0f, RPM);
-        			
-        			if(done() == false) break;
-        			
-        			motor_.rotate(+59.0f, RPM);
+    		adj = -1.0f;
+    	}
+    	
+    	switch(command.charAt(1))
+    	{
+    		case '1' :
+    		{
+    			motor_.move(2614.0f - 393.0f, RPM);
+    			
+    			if(done() == false) break;
+    			
+    			motor_.rotate(+59.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move(2203.0f, RPM);
+    			motor_.move(2203.0f, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-            		drop_.set(true);
+        		drop_.set(true);
 
-        			motor_.move(-500.0f, RPM / 2.0f);
+    			motor_.move(-500.0f, RPM / 2.0f);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-            		drop_.set(false);
+        		drop_.set(false);
 
-        			motor_.move(-(2203.0f - 500.0f), RPM);
+    			motor_.move(-(2203.0f - 500.0f), RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.rotate(-59.0f, RPM);
+    			motor_.rotate(-59.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move((4706.0f - (2614.0f - 393.0f)) + (7148.0f - 1000.0f), RPM);
+    			motor_.move((4706.0f - (2614.0f - 393.0f)) + (7148.0f - 1000.0f), RPM);
 
-        			done();
+    			done();
 
-        			break;
-        		}
-        		
-        		case '2' :
-        		{
-        			motor_.move(2840.0f - (787.4f / 2.0f) - (787.4f / 2.0f), RPM);
-        			
-        			if(done() == false) break;
-        			
-            		drop_.set(true);
+    			break;
+    		}
+    		
+    		case '2' :
+    		{
+    			motor_.move(2840.0f - (787.4f / 2.0f) - (787.4f / 2.0f), RPM);
+    			
+    			if(done() == false) break;
+    			
+        		drop_.set(true);
 
-        			motor_.move(-1146.0f, RPM / 2.0f);
+    			motor_.move(-1146.0f, RPM / 2.0f);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-            		drop_.set(false);
+        		drop_.set(false);
 
-        			motor_.rotate(-45.0f, RPM);
+    			motor_.rotate(-45.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move(4949.0f, RPM);
+    			motor_.move(4949.0f, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.rotate(+45.0f, RPM);
+    			motor_.rotate(+45.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move(+6000.0f, RPM);
+    			motor_.move(+6000.0f, RPM);
 
-        			done();
-        			
-        			break;
-        		}
-        	
-        		case '3' :
-        		{
-        			motor_.move(2146.0f - 393.0f, RPM);
-        			
-        			if(done() == false) break;
-        			
-        			motor_.rotate(+59.0f, RPM);
+    			done();
+    			
+    			break;
+    		}
+    	
+    		case '3' :
+    		{
+    			motor_.move(2146.0f - 393.0f, RPM);
+    			
+    			if(done() == false) break;
+    			
+    			motor_.rotate(+59.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move(2238.0f, RPM);
+    			motor_.move(2238.0f, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-            		drop_.set(true);
+        		drop_.set(true);
 
-        			motor_.move(-500.0f, RPM / 2.0f);
+    			motor_.move(-500.0f, RPM / 2.0f);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-            		drop_.set(false);
+        		drop_.set(false);
 
-        			motor_.move(-(2238.0f - 500.0f), RPM);
+    			motor_.move(-(2238.0f - 500.0f), RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.rotate(+59.0f, RPM);
+    			motor_.rotate(+59.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move(4706.0f - (2146.0f - 393.0f), RPM);
+    			motor_.move(4706.0f - (2146.0f - 393.0f), RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.rotate(-45.0f, RPM);
+    			motor_.rotate(-45.0f * adj, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.move(7000.0f, RPM);
+    			motor_.move(7000.0f, RPM);
 
-        			if(done() == false) break;
+    			if(done() == false) break;
 
-        			motor_.rotate(+45.0f, RPM);
+    			motor_.rotate(+45.0f * adj, RPM);
 
-        			done();
+    			done();
 
-        			break;
-        		}
-        	}
+    			break;
+    		}
     	}
     	
     	System.out.println("<- autonomous()");
