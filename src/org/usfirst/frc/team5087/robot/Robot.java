@@ -436,15 +436,15 @@ public class Robot extends SampleRobot
         	{
         		case '1' :
         		{
-        			motor_.move(2540.0f - (787.4f / 2.0f), 200.0f);
+        			motor_.move(2614.0f - 393.0f, RPM);
         			
         			if(done() == false) break;
         			
-        			motor_.rotate(+60.0f, RPM);
+        			motor_.rotate(+59.0f, RPM);
 
         			if(done() == false) break;
 
-        			motor_.move(1500.0f, RPM);
+        			motor_.move(2203.0f, RPM);
 
         			if(done() == false) break;
 
@@ -456,15 +456,15 @@ public class Robot extends SampleRobot
 
             		drop_.set(false);
 
-        			motor_.move(-1000.0f, RPM);
+        			motor_.move(-(2203.0f - 500.0f), RPM);
 
         			if(done() == false) break;
 
-        			motor_.rotate(-60.0f, RPM);
+        			motor_.rotate(-59.0f, RPM);
 
         			if(done() == false) break;
 
-        			motor_.move(1772.0f + 6000.0f, RPM);
+        			motor_.move((4706.0f - (2614.0f - 393.0f)) + (7148.0f - 1000.0f), RPM);
 
         			done();
 
@@ -506,15 +506,15 @@ public class Robot extends SampleRobot
         	
         		case '3' :
         		{
-        			motor_.move(2540.0f - (787.4f / 2.0f), RPM);
+        			motor_.move(2146.0f - 393.0f, RPM);
         			
         			if(done() == false) break;
         			
-        			motor_.rotate(-60.0f, RPM);
+        			motor_.rotate(+59.0f, RPM);
 
         			if(done() == false) break;
 
-        			motor_.move(1500.0f, RPM);
+        			motor_.move(2238.0f, RPM);
 
         			if(done() == false) break;
 
@@ -526,15 +526,15 @@ public class Robot extends SampleRobot
 
             		drop_.set(false);
 
-        			motor_.move(-1500.0f, RPM);
+        			motor_.move(-(2238.0f - 500.0f), RPM);
 
         			if(done() == false) break;
 
-        			motor_.rotate(+60.0f, RPM);
+        			motor_.rotate(+59.0f, RPM);
 
         			if(done() == false) break;
 
-        			motor_.move(1772.0f, RPM);
+        			motor_.move(4706.0f - (2146.0f - 393.0f), RPM);
 
         			if(done() == false) break;
 
