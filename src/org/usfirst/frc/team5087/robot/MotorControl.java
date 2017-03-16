@@ -375,8 +375,8 @@ public class MotorControl
 	void configure(int _talon, int _slot, double _rpm)
 	{
 		double	F = 1023.0f / ((_rpm * RATE) / DIVIDER);		// See section 12.8.3.
-		double	P = 6.0f;
-		double	I = 0.0001f;
+		double	P = 4.0f;
+		double	I = 0.0002f;
 		double	D = P * 10.0f;
 
 		int		IZ= 50;
