@@ -57,7 +57,7 @@ public class Robot extends SampleRobot
     
     CvSource			outputStream_;
     
-    double				speedLimit_ = 0.90;		// 90% of max speed.
+    double				speedLimit_ = 1.0f;
 
     CANTalon			climbLeft_;
     CANTalon			climbRight_;
@@ -71,7 +71,6 @@ public class Robot extends SampleRobot
     Movement			movement_;
 
     MotorControl		motor_;
-    RamsRobotDrive		drive_;
     Joystick			joystick_;
     Solenoid			drop_;
 
@@ -97,7 +96,7 @@ public class Robot extends SampleRobot
 
         	movement_ = new Movement(motor_.left(), motor_.right());
         
-            speedLimit_ = 0.90;			// Max of 50% speed for movement.
+            speedLimit_ = 1.0;
     	}
     	
     	if(InstalledHardware.CLIMB == true)
@@ -232,7 +231,7 @@ public class Robot extends SampleRobot
             	
             	// Display the correct video.
 
-        		original.release();	// TODO should we do this?
+        		original.release();
 
             	switch(cameraInUse_)
             	{
@@ -380,7 +379,7 @@ public class Robot extends SampleRobot
      * @return	false=interrupted, true=magic finished.
      */
     
-    boolean areWeThereYet()
+	boolean areWeThereYet()
     {
     	boolean	ret = false;
     	
@@ -395,6 +394,12 @@ public class Robot extends SampleRobot
     	return ret;
     }
 
+    /**
+     * Wait until we have completed the move, or auto is over.
+     * 
+     * @return
+     */
+    
     public boolean done()
     {
 		while(isEnabled() && ((areWeThereYet() == false)))
@@ -416,7 +421,10 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> autonomous()");
 
-    	motor_.setup();
+    	if(InstalledHardware.DRIVE == true)
+    	{
+        	motor_.setup(false);
+    	}
     	
     	String	command = SmartDashboard.getString("DB/String 0", "?").toLowerCase();
     	
@@ -549,52 +557,6 @@ public class Robot extends SampleRobot
     	
     	System.out.println("<- autonomous()");
     }
-
-    /*
-    	double pinX = 0.0f;
-    	double	pinY = 0.0f;
-    	double pinA = 0.0f;
-
-		switch(command.charAt(4))
-		{
-			case '1' :	pinX = 3300.0f;	pinY = 3270.0f;	pinA = 121.0f;	break;	// Top.
-			case '2' :	pinX = 2840.0f; pinY = 4115.0f;	pinA = 180.0f;	break;	// Middle.
-			case '3' :	pinX = 3300.0f; pinY = 4960.0f;	pinA = 239.0f;	break;	// Bottom.
-		}
-
-		// Grab the center of the robot.
-
-		double	facing = 0.0f;
-		
-    	double	robotX = Dimensions.robotLengthBumperMM / 2.0f;
-    	double	robotY = Dimensions.robotWidthBumperMM / 2.0f;
-
-    	if(command.charAt(0) == 'b')	// Blue side .
-    	{
-    		facing = 180.0f;
-    		
-    		pinA   = 180.0f - pinA;
-    		
-    		pinX   = Dimensions.fieldLengthMM - pinX;
-    		robotX = Dimensions.fieldLengthMM - robotX;
-    	}
-
-		switch(command.charAt(1))
-		{
-			case '1' :	robotY += 1000.0f;	break;
-			case '2' :	robotY += 4115.0f;	break;
-			case '3' :	robotY += 7260.0f;	break;
-		}
-		
-		movement_.setXYR(robotX, robotY, facing);
-
-    	if(InstalledHardware.DRIVE == true)
-    	{
-    		// Find robot location "[rb][1-3]"
-    		
-    		// Find requested drop off "g[1-3]"
-    	}
-     */
     
     /*
      * (non-Javadoc)
@@ -605,17 +567,11 @@ public class Robot extends SampleRobot
 	public void operatorControl()
     {
     	System.out.println("-> operatorControl()");
-    	
+
     	if(InstalledHardware.DRIVE == true)
     	{
-        	drive_ = new RamsRobotDrive(motor_.left(), motor_.right());
-        	
-            drive_.setExpiration(0.1f);
-            
-    		drive_.setSafetyEnabled(true);
+        	motor_.setup(false);
     	}
-
-    	motor_.setup();
 
         while(isOperatorControl() && isEnabled())
         {
@@ -628,11 +584,13 @@ public class Robot extends SampleRobot
         	switchCamera();
         	
         	climbRope();
-        	
+
+        /*
         	if(InstalledHardware.SPOKE_SENSOR == true)
         	{
         		System.out.println("S:" + spokesensor_.position());	// TODO fix this!
         	}
+        */
         	
             Timer.delay(0.005);
         }
@@ -649,7 +607,7 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> test()");
 
-    	motor_.setup();
+    	motor_.setup(true);
     	
     	motor_.rotate(+90.0f, RPM);
 //    	motor_.move(+500.0f, 200.0f);
@@ -687,16 +645,14 @@ public class Robot extends SampleRobot
         	{
         		case FRONT_CAMERA :
         		{
-                	drive_.arcadeDrive(-joystick_.getY() * speedLimit_,
-                					   -joystick_.getX() * speedLimit_, true);
+                	motor_.arcadeDrive(-joystick_.getY() * speedLimit_, -joystick_.getX() * speedLimit_, true);
                 	
         			break;
         		}
         		
         		case REAR_CAMERA :
         		{
-                	drive_.arcadeDrive(+joystick_.getY() * speedLimit_,
-    								   -joystick_.getX() * speedLimit_, true);
+                	motor_.arcadeDrive(+joystick_.getY() * speedLimit_, -joystick_.getX() * speedLimit_, true);
                 	
         			break;
         		}
@@ -724,7 +680,7 @@ public class Robot extends SampleRobot
         		case 90 :
         		case 135 :
         		{
-            		drive_.arcadeDrive(0.0, -0.45f, true);
+            		motor_.arcadeDrive(0.0, -0.45f, true);
 
         			break;
         		}
@@ -733,7 +689,7 @@ public class Robot extends SampleRobot
         		case 270 :
         		case 315 :
         		{
-            		drive_.arcadeDrive(0.0, +0.55f, true);
+            		motor_.arcadeDrive(0.0, +0.55f, true);
 
             		break;
         		}

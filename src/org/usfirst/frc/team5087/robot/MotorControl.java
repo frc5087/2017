@@ -14,16 +14,16 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class MotorControl
 {
-	static final boolean	SHOW_CONFIG	= true;
-	static	final boolean	SHOW_THEREYET	= true;
+	static final boolean	SHOW_CONFIG	= false;
+	static	final boolean	SHOW_THEREYET	= false;
 
     static	final int	LEFT_MASTER	= 0;
     static	final int	RIGHT_MASTER	= 1;
     static	final int	LEFT_SLAVE		= 2;
     static	final int	RIGHT_SLAVE	= 3;
 
-    double[]	positions_	= new double[4];
-    double[]	timeouts_	= new double[4];
+    double[]	positions_	= new double[2];
+    double[]	timeouts_	= new double[2];
    
 	CANTalon[]	talons_		= new CANTalon[4];
 
@@ -55,7 +55,7 @@ public class MotorControl
         	talons_[RIGHT_SLAVE].changeControlMode(TalonControlMode.Follower);
         	talons_[RIGHT_SLAVE].set(talons_[RIGHT_MASTER].getDeviceID());
 
-        	setup();
+        	setup(false);
     	}
 	}
 
@@ -63,22 +63,27 @@ public class MotorControl
 	 * Setup all the configuration for the talons.
 	 */
 	
-	void setup()
+	void setup(boolean _auto)
 	{
 		// Configure the left hand side.
 
     	talons_[LEFT_MASTER].reverseOutput(false);
     	talons_[LEFT_MASTER].reverseSensor(true);	
 
-    	talons_[LEFT_SLAVE].reverseOutput(false);
-
     	// Configure the right hand side.
 
     	talons_[RIGHT_MASTER].reverseOutput(true);
     	talons_[RIGHT_MASTER].reverseSensor(false);	
 
-    	talons_[RIGHT_SLAVE].reverseOutput(true);
+    	if(_auto == false)
+    	{
+            talons_[LEFT_SLAVE].changeControlMode(TalonControlMode.Follower);
+            talons_[LEFT_SLAVE].set(talons_[LEFT_MASTER].getDeviceID());
 
+            talons_[RIGHT_SLAVE].changeControlMode(TalonControlMode.Follower);
+            talons_[RIGHT_SLAVE].set(talons_[RIGHT_MASTER].getDeviceID());
+    	}
+    	
     	// Setup the basic information for all of the motor controllers.
 
     	for(int i = 0; i < 4; ++i)
@@ -89,12 +94,12 @@ public class MotorControl
     			
     			talons_[i].setPosition(0.0f);					// Reset encoder to zero.
     	    	talons_[i].setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+
+    	    	talons_[i].changeControlMode(TalonControlMode.PercentVbus);
+            	talons_[i].set(0.0f);
     		}
     		
 //    		talons_[i].enableBrakeMode(true);					// When not moving, brake.
-
-        	talons_[i].changeControlMode(TalonControlMode.PercentVbus);
-        	talons_[i].set(0.0f);
 
         	talons_[i].configMaxOutputVoltage(12.0f);
         	talons_[i].configNominalOutputVoltage(0.0f, 0.0f);
@@ -141,7 +146,7 @@ public class MotorControl
 		MotionMagic(LEFT_MASTER,  distance);
 		MotionMagic(RIGHT_MASTER, distance);
 		
-		System.out.println("Moving by " + _mm + "mm (" + distance + " wheel rotations).");
+//		System.out.println("Moving by " + _mm + "mm (" + distance + " wheel rotations).");
 	}
 
 	/**
@@ -284,7 +289,7 @@ public class MotorControl
 	    }
 	    
 	    left = limit(left);
-	    right = limit(right);
+	    right = -limit(right);	// -ve as we configure the right motor in the correct direction.
 
 	    left().changeControlMode(TalonControlMode.PercentVbus);
 	    left().set(left);
@@ -430,7 +435,6 @@ public class MotorControl
 	 * @param	_position	Position to adjust by.
 	 */
 
-	@SuppressWarnings("unused")
 	void MotionMagic(int _talon, double _position)
 	{
 		CANTalon	talon = talons_[_talon];
