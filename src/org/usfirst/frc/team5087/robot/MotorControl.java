@@ -95,8 +95,8 @@ public class MotorControl
     			talons_[i].setPosition(0.0f);					// Reset encoder to zero.
     	    	talons_[i].setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 
-    	    	talons_[i].changeControlMode(TalonControlMode.PercentVbus);
-            	talons_[i].set(0.0f);
+//    	    	talons_[i].changeControlMode(TalonControlMode.PercentVbus);
+//            	talons_[i].set(0.0f);
     		}
     		
 //    		talons_[i].enableBrakeMode(true);					// When not moving, brake.
@@ -206,7 +206,7 @@ public class MotorControl
 				);
 		}
 		
-		if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.005f)
+		if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.002f)
 		{
 			ret = true;
 		}
@@ -221,6 +221,21 @@ public class MotorControl
 		}
 
 		return ret;
+	}
+
+	/**
+	 * 
+	 */
+	
+	void allDone()
+	{
+		left().changeControlMode(TalonControlMode.PercentVbus);
+		left().set(0.0f);
+
+		right().changeControlMode(TalonControlMode.PercentVbus);
+		right().set(0.0f);
+		
+		Timer.delay(0.10f);
 	}
 	
 	/**
