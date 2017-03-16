@@ -495,6 +495,14 @@ public class RamsRobotDrive implements MotorSafety {
       m_safetyHelper.feed();
     }
   }
+  
+  void feedme()
+  {
+	  if (m_safetyHelper != null)
+	  {
+		  m_safetyHelper.feed();
+	  }
+  }
 
   /**
    * Drive method for Mecanum wheeled robots.

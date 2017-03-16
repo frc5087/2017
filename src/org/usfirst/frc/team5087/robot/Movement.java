@@ -16,14 +16,14 @@ public class Movement
 	
     private final double mm = 25.4;					// mm to an inch.
 
-    private final double Di = 6.0;                  	// Wheel diameter.
-    private final double Ti = 1.0;                  	// Tread width.
-    private final double Wi = 20.75 - Ti;           	// Distance between wheel centers.
+    private final double Di = 6.0f;                 	// Wheel diameter.
+    private final double Ti = 1.0f;                 	// Tread width.
+    private final double Wi = 20.75f - Ti;          	// Distance between wheel centers.
 
-    private final double rW = (Di * mm) / 2.0;      	// Radius of drive wheel.
+    private final double rW = (Di * mm) / 2.0f;     	// Radius of drive wheel.
     private final double b  = (Wi * mm);            	// Distance between center of each wheel tread.
 	
-    private int[]		last_ = new int[2];
+    private double[]	last_ = new double[2];
 	private CANTalon[]  tal_ = new CANTalon[2];
 	private String[]  names_ = new String[] { "left", "right" };
 
@@ -101,9 +101,9 @@ public class Movement
 	 * Return the encoder position for the requested side.
 	 */
 	
-	int position(int _side)
+	double position(int _side)
 	{
-		return tal_[_side].getPulseWidthPosition();
+		return tal_[_side].getPosition();
 	}
 
 	/*
@@ -112,27 +112,18 @@ public class Movement
 	
 	double movement(int _side)
 	{
-		final int FLUTTER = 2;
+		double now = position(_side);
 		
-		int now = position(_side);
-		
-		int diff = last_[_side] - now;
+		double diff = last_[_side] - now;
 		
 		last_[_side] = now;
 		
-		double ret = 0.0;
-		
-		if((diff < -FLUTTER) || (diff > FLUTTER))
+		if(_side == RIGHT)
 		{
-			ret = (double) diff / 4096.0;
-			
-			if(_side == RIGHT)
-			{
-				ret = -ret;
-			}
+			diff = -diff;
 		}
 		
-		return ret; 
+		return diff; 
 	}
     
 	/*

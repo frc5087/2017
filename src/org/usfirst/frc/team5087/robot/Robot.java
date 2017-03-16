@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /*
  * 
@@ -96,10 +97,6 @@ public class Robot extends SampleRobot
 
         	movement_ = new Movement(motor_.left(), motor_.right());
         
-        	drive_ = new RamsRobotDrive(motor_.left(), motor_.right());
-        	
-            drive_.setExpiration(0.1f);
-            
             speedLimit_ = 0.90;			// Max of 50% speed for movement.
     	}
     	
@@ -161,7 +158,7 @@ public class Robot extends SampleRobot
 	public void robotInit()
     {
     	System.out.println("-> robotInit()");
-        
+
         visionThread_ = new Thread(() ->
         {
         	System.out.println("-> Thread()");
@@ -377,6 +374,39 @@ public class Robot extends SampleRobot
     	System.out.println("<- disabled()");
     }
 
+    /**
+     * See if a requested move has completed, or we've finished auto mode.
+     * 
+     * @return	false=interrupted, true=magic finished.
+     */
+    
+    boolean areWeThereYet()
+    {
+    	boolean	ret = false;
+    	
+    	boolean	one = motor_.areWeThereYet(motor_.LEFT_MASTER);
+    	boolean	two = motor_.areWeThereYet(motor_.RIGHT_MASTER);
+    	
+   		if((one = true) && (two == true))
+   		{
+    		ret = true;
+    	}
+    
+    	return ret;
+    }
+
+    public boolean done()
+    {
+		while(isEnabled() && ((areWeThereYet() == false)))
+    	{
+            Timer.delay(0.005);
+    	}
+
+		return isEnabled();
+    }
+    
+    static double RPM = 250.0f;
+    
     /*
      * (non-Javadoc)
      * @see edu.wpi.first.wpilibj.SampleRobot#autonomous()
@@ -386,13 +416,186 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> autonomous()");
 
-    	if(InstalledHardware.DRIVE == true)
-    	{
-    	}
+    	motor_.setup();
+    	
+    	String	command = SmartDashboard.getString("DB/String 0", "?").toLowerCase();
+    	
+    	System.out.println(command);
 
+    	if(command.charAt(0) == 'r')
+    	{
+        	switch(command.charAt(1))
+        	{
+        		case '1' :
+        		{
+        			motor_.move(2540.0f - (787.4f / 2.0f), 200.0f);
+        			
+        			if(done() == false) break;
+        			
+        			motor_.rotate(+60.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(1500.0f, RPM);
+
+        			if(done() == false) break;
+
+            		drop_.set(true);
+
+        			motor_.move(-500.0f, RPM / 2.0f);
+
+        			if(done() == false) break;
+
+            		drop_.set(false);
+
+        			motor_.move(-1000.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.rotate(-60.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(1772.0f + 6000.0f, RPM);
+
+        			done();
+
+        			break;
+        		}
+        		
+        		case '2' :
+        		{
+        			motor_.move(2840.0f - (787.4f / 2.0f) - (787.4f / 2.0f), RPM);
+        			
+        			if(done() == false) break;
+        			
+            		drop_.set(true);
+
+        			motor_.move(-1146.0f, RPM / 2.0f);
+
+        			if(done() == false) break;
+
+            		drop_.set(false);
+
+        			motor_.rotate(-45.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(4949.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.rotate(+45.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(+6000.0f, RPM);
+
+        			done();
+        			
+        			break;
+        		}
+        	
+        		case '3' :
+        		{
+        			motor_.move(2540.0f - (787.4f / 2.0f), RPM);
+        			
+        			if(done() == false) break;
+        			
+        			motor_.rotate(-60.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(1500.0f, RPM);
+
+        			if(done() == false) break;
+
+            		drop_.set(true);
+
+        			motor_.move(-500.0f, RPM / 2.0f);
+
+        			if(done() == false) break;
+
+            		drop_.set(false);
+
+        			motor_.move(-1500.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.rotate(+60.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(1772.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.rotate(-45.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.move(7000.0f, RPM);
+
+        			if(done() == false) break;
+
+        			motor_.rotate(+45.0f, RPM);
+
+        			done();
+
+        			break;
+        		}
+        	}
+    	}
+    	
     	System.out.println("<- autonomous()");
     }
 
+    /*
+    	double pinX = 0.0f;
+    	double	pinY = 0.0f;
+    	double pinA = 0.0f;
+
+		switch(command.charAt(4))
+		{
+			case '1' :	pinX = 3300.0f;	pinY = 3270.0f;	pinA = 121.0f;	break;	// Top.
+			case '2' :	pinX = 2840.0f; pinY = 4115.0f;	pinA = 180.0f;	break;	// Middle.
+			case '3' :	pinX = 3300.0f; pinY = 4960.0f;	pinA = 239.0f;	break;	// Bottom.
+		}
+
+		// Grab the center of the robot.
+
+		double	facing = 0.0f;
+		
+    	double	robotX = Dimensions.robotLengthBumperMM / 2.0f;
+    	double	robotY = Dimensions.robotWidthBumperMM / 2.0f;
+
+    	if(command.charAt(0) == 'b')	// Blue side .
+    	{
+    		facing = 180.0f;
+    		
+    		pinA   = 180.0f - pinA;
+    		
+    		pinX   = Dimensions.fieldLengthMM - pinX;
+    		robotX = Dimensions.fieldLengthMM - robotX;
+    	}
+
+		switch(command.charAt(1))
+		{
+			case '1' :	robotY += 1000.0f;	break;
+			case '2' :	robotY += 4115.0f;	break;
+			case '3' :	robotY += 7260.0f;	break;
+		}
+		
+		movement_.setXYR(robotX, robotY, facing);
+
+    	if(InstalledHardware.DRIVE == true)
+    	{
+    		// Find robot location "[rb][1-3]"
+    		
+    		// Find requested drop off "g[1-3]"
+    	}
+     */
+    
     /*
      * (non-Javadoc)
      * @see edu.wpi.first.wpilibj.SampleRobot#operatorControl()
@@ -405,9 +608,15 @@ public class Robot extends SampleRobot
     	
     	if(InstalledHardware.DRIVE == true)
     	{
+        	drive_ = new RamsRobotDrive(motor_.left(), motor_.right());
+        	
+            drive_.setExpiration(0.1f);
+            
     		drive_.setSafetyEnabled(true);
     	}
-        
+
+    	motor_.setup();
+
         while(isOperatorControl() && isEnabled())
         {
         	moveRobot();
@@ -430,7 +639,7 @@ public class Robot extends SampleRobot
         
     	System.out.println("<- operatorControl()");
     }
-
+    
     /*
      * (non-Javadoc)
      * @see edu.wpi.first.wpilibj.SampleRobot#test()
@@ -440,29 +649,18 @@ public class Robot extends SampleRobot
     {
     	System.out.println("-> test()");
 
-    	double	min = 999.0f;
-    	double	max = 0.0f;
-
-    /*
-    	double[]	rpm = new double[4];
+    	motor_.setup();
     	
-    	rpm[0] = motor_.RPM(motor_.left(), 0, +1);
-    	rpm[1] = motor_.RPM(motor_.left(), 0, -1);
-    	rpm[2] = motor_.RPM(motor_.right(), 0, +1);
-    	rpm[3] = motor_.RPM(motor_.right(), 0, -1);
+    	motor_.rotate(+90.0f, RPM);
+//    	motor_.move(+500.0f, 200.0f);
 
-    	for(int i = 0; i < 4; ++i)
-    	{
-    		if(rpm[i] > max) max = rpm[i];
-    		if(rpm[i] < min) min = rpm[i];
-    	}
-    */
-    	
-    	min = 192.0f;
-    	
-    	motor_.configure(motor_.left(), 0, min);
-    	motor_.configure(motor_.right(), 0, min);
+    	done();
 
+    	motor_.rotate(-90.0f, RPM);
+//    	motor_.move(-500.0f, 200.0f);
+
+    	done();
+    	
     	System.out.println("<- test()");
     }
 

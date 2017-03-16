@@ -15,13 +15,17 @@ import edu.wpi.first.wpilibj.Timer;
 public class MotorControl
 {
 	static final boolean	SHOW_CONFIG	= true;
+	static	final boolean	SHOW_THEREYET	= true;
 
-    static final int	LEFT_MASTER	= 0;
-    static final int	LEFT_SLAVE		= 1;
-    static final int	RIGHT_MASTER	= 2;
-    static final int	RIGHT_SLAVE	= 3;
-    
-	CANTalon[]	talons_ = new CANTalon[4];
+    static	final int	LEFT_MASTER	= 0;
+    static	final int	RIGHT_MASTER	= 1;
+    static	final int	LEFT_SLAVE		= 2;
+    static	final int	RIGHT_SLAVE	= 3;
+
+    double[]	positions_	= new double[4];
+    double[]	timeouts_	= new double[4];
+   
+	CANTalon[]	talons_		= new CANTalon[4];
 
 	/*
 	 * Main constructor.
@@ -39,13 +43,9 @@ public class MotorControl
     		
         	talons_[LEFT_MASTER]	= new CANTalon(4);
         	talons_[LEFT_SLAVE]	= new CANTalon(8);
-        	
+
         	talons_[LEFT_SLAVE].changeControlMode(TalonControlMode.Follower);
         	talons_[LEFT_SLAVE].set(talons_[LEFT_MASTER].getDeviceID());
-
-        	talons_[LEFT_MASTER].setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-        	talons_[LEFT_MASTER].reverseOutput(false);
-        	talons_[LEFT_MASTER].reverseSensor(true);	
 
         	// Setup the right hand side where #2 has the right gear-box sensor.
         	
@@ -55,21 +55,50 @@ public class MotorControl
         	talons_[RIGHT_SLAVE].changeControlMode(TalonControlMode.Follower);
         	talons_[RIGHT_SLAVE].set(talons_[RIGHT_MASTER].getDeviceID());
 
-        	talons_[RIGHT_MASTER].setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-        	talons_[RIGHT_MASTER].reverseOutput(true);
-        	talons_[RIGHT_MASTER].reverseSensor(false);	
+        	setup();
+    	}
+	}
 
-        	// Setup the basic information for all of the motor controllers.
+	/**
+	 * Setup all the configuration for the talons.
+	 */
+	
+	void setup()
+	{
+		// Configure the left hand side.
 
-        	for(int i = 0; i < 4; ++i)
-        	{
-        		talons_[i].setPosition(0.0f);						// Reset encoder to zero.
-            	talons_[i].enableBrakeMode(true);					// When not moving, brake.
-            	
-            	talons_[i].configMaxOutputVoltage(12.0f);
-            	talons_[i].configNominalOutputVoltage(0.0f, 0.0f);
-            	talons_[i].configPeakOutputVoltage(+12.0f, -12.0f);
-        	}
+    	talons_[LEFT_MASTER].reverseOutput(false);
+    	talons_[LEFT_MASTER].reverseSensor(true);	
+
+    	talons_[LEFT_SLAVE].reverseOutput(false);
+
+    	// Configure the right hand side.
+
+    	talons_[RIGHT_MASTER].reverseOutput(true);
+    	talons_[RIGHT_MASTER].reverseSensor(false);	
+
+    	talons_[RIGHT_SLAVE].reverseOutput(true);
+
+    	// Setup the basic information for all of the motor controllers.
+
+    	for(int i = 0; i < 4; ++i)
+    	{
+    		if(i < 2)
+    		{
+    			positions_[i] = 0.0f;							// Saved positions to zero.
+    			
+    			talons_[i].setPosition(0.0f);					// Reset encoder to zero.
+    	    	talons_[i].setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+    		}
+    		
+//    		talons_[i].enableBrakeMode(true);					// When not moving, brake.
+
+        	talons_[i].changeControlMode(TalonControlMode.PercentVbus);
+        	talons_[i].set(0.0f);
+
+        	talons_[i].configMaxOutputVoltage(12.0f);
+        	talons_[i].configNominalOutputVoltage(0.0f, 0.0f);
+        	talons_[i].configPeakOutputVoltage(+12.0f, -12.0f);
     	}
 	}
 	
@@ -93,6 +122,100 @@ public class MotorControl
 	CANTalon right()
 	{
 		return talons_[RIGHT_MASTER];
+	}
+
+	/**
+	 * Start moving forwards/backwards by the specified distance.
+	 * 
+	 * @param	_mm
+	 * @param	_rpm
+	 */
+	
+	void move(double _mm, double _rpm)
+	{
+		configure(LEFT_MASTER,  0, _rpm);
+		configure(RIGHT_MASTER, 0, _rpm);
+
+		double	distance = _mm / Dimensions.wheelCircumferenceMM;
+
+		MotionMagic(LEFT_MASTER,  distance);
+		MotionMagic(RIGHT_MASTER, distance);
+		
+		System.out.println("Moving by " + _mm + "mm (" + distance + " wheel rotations).");
+	}
+
+	/**
+	 * Adjust the rotation by the required amount.
+	 * 
+	 * @param _angle
+	 */
+	
+	void rotate(double _angle, double _rpm)
+	{
+		configure(LEFT_MASTER,  0, _rpm);
+		configure(RIGHT_MASTER, 0, _rpm);
+		
+		double	curcumference = Dimensions.wheelGapMM * Math.PI;
+		
+		double angle = Math.abs(_angle) / 360.0f;
+		
+		double	mm = angle * curcumference;
+		
+		double	distance = mm / Dimensions.wheelCircumferenceMM;
+
+		if(_angle < 0.0f)
+		{
+			MotionMagic(LEFT_MASTER,  -distance);
+			MotionMagic(RIGHT_MASTER, +distance);
+		}
+		else
+		{
+			MotionMagic(LEFT_MASTER,  +distance);
+			MotionMagic(RIGHT_MASTER, -distance);
+		}
+
+		System.out.println("Moving by " + mm + "mm (" + distance + " wheel rotations).");
+	}
+
+	/**
+	 * Report if the Motion Magic has finished or not. 
+	 * 
+	 * @param	_talon	Talon index to check.
+	 * 
+	 * @return	false=not there yet, true=we are there.
+	 */
+	
+	@SuppressWarnings("unused")
+	boolean areWeThereYet(int _talon)
+	{
+		boolean	ret = false;
+		CANTalon	talon = talons_[_talon];
+		
+		if(SHOW_THEREYET == true)
+		{
+			System.out.printf("%d,%2.6f,%2.6f,%2.6f\n",
+					_talon,												// Talon index.
+					talon.getPosition(),								// Encoder position.
+					talon.getError() / RATE,							// Difference between set pos and current pos.
+					talon.getSpeed()									// Speed in RPM.
+				);
+		}
+		
+		if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.005f)
+		{
+			ret = true;
+		}
+		
+		if(Timer.getFPGATimestamp() > timeouts_[_talon])
+		{
+			ret = true;
+			
+			System.out.println("****************");
+			System.out.println("** TIMEOUT #" + _talon + " **");
+			System.out.println("****************");
+		}
+
+		return ret;
 	}
 	
 	/**
@@ -173,22 +296,24 @@ public class MotorControl
 	/**
 	 * Calculate and return the RPM value at full speed.
 	 * 
-	 * @param	_talon		Talon SRX to configure.
+	 * @param	_talon		Talon index to configure.
 	 * @param	_slot		Talon SRX slot to store results in.
 	 * @param	_direction	-1 for backwards and +1 for forwards.
 	 * 
 	 * @return				Average RPM of the motor output.
 	 */
 	
-	double RPM(CANTalon _talon, int _slot, int _direction)
+	double RPM(int _talon, int _slot, int _direction)
 	{
-		_talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		_talon.reverseSensor(true);
+		CANTalon	talon = talons_[_talon];
+		
+		talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		talon.reverseSensor(true);
 
 		// Percent voltage mode.
 
-		_talon.changeControlMode(TalonControlMode.PercentVbus);
-		_talon.set((double) _direction);
+		talon.changeControlMode(TalonControlMode.PercentVbus);
+		talon.set((double) _direction);
 
 		wait(250);
 		
@@ -201,7 +326,7 @@ public class MotorControl
 
 		while(Timer.getFPGATimestamp() < start)
 		{
-			rpm = rpm + _talon.getSpeed();
+			rpm = rpm + talon.getSpeed();
 
 			++rpmcount;
 		}
@@ -221,7 +346,7 @@ public class MotorControl
 
 		// Stop the motor running for the moment.
 		
-		_talon.set(0.0f);
+		talon.set(0.0f);
 
 		wait(250);
 
@@ -236,14 +361,14 @@ public class MotorControl
 	 * @param	_rpm	Max RPM to run at.
 	 */
 	
-	static final int	RATE		= 4096;						// Ticks per single rotation.
-	static final int	NATIVE		= 100;						// 100ms.
-	static final int	DIVIDER	= 60 * (1000 / NATIVE);
+	static final double	RATE		= 4096.0f;					// Ticks per single rotation.
+	static final double	NATIVE		= 100.0f;					// 100ms.
+	static final double	DIVIDER	= 60.0f * (1000.0f / NATIVE);
 	
-	void configure(CANTalon _talon, int _slot, double _rpm)
+	void configure(int _talon, int _slot, double _rpm)
 	{
 		double	F = 1023.0f / ((_rpm * RATE) / DIVIDER);		// See section 12.8.3.
-		double	P = 6.0f;
+		double	P = 3.0f;
 		double	I = 0.0001f;
 		double	D = P * 10.0f;
 
@@ -270,21 +395,24 @@ public class MotorControl
 	 * @param	_MMA
 	 */
 	
-	void configureSlot(CANTalon _talon, int _slot,
+	@SuppressWarnings("unused")
+	void configureSlot(int _talon, int _slot,
 						double _F, double _P, double _I, double _D,
 						int IZ, double _MMCV, double _MMA)
 	{
-		_talon.setProfile(_slot);
+		CANTalon talon = talons_[_talon];
 
-		_talon.setF(_F);
-		_talon.setP(_P);
-		_talon.setI(_I);
-		_talon.setD(_D);
+		talon.setProfile(_slot);
+
+		talon.setF(_F);
+		talon.setP(_P);
+		talon.setI(_I);
+		talon.setD(_D);
 		
-		_talon.setIZone(IZ);
+		talon.setIZone(IZ);
 		
-		_talon.setMotionMagicCruiseVelocity(_MMCV);
-		_talon.setMotionMagicAcceleration(_MMA);
+		talon.setMotionMagicCruiseVelocity(_MMCV);
+		talon.setMotionMagicAcceleration(_MMA);
 
 		if(SHOW_CONFIG == true)
 		{
@@ -298,38 +426,27 @@ public class MotorControl
 	/**
 	 * Run the Motion Magic profile for a few seconds, or if the position is good, earlier.
 	 * 
-	 * @param	_talon		Talon to run the Motion Magic on.
+	 * @param	_talon		Talon index to run the Motion Magic on.
 	 * @param	_position	Position to adjust by.
-	 * 
-	 * @return				Value of getClosedLoopError().
 	 */
 
-	int runMotionMagic(CANTalon _talon, double _position)
+	@SuppressWarnings("unused")
+	void MotionMagic(int _talon, double _position)
 	{
-		_position += _talon.getPosition();							// Adjust the current position.
-		
-		_talon.changeControlMode(TalonControlMode.MotionMagic);
-		_talon.set(_position);										// Number of wheel rotations.
-		
-		int		count = 0;
-		
-		double	start = Timer.getFPGATimestamp() + 4.0f;			// Run for about 4 seconds.
+		CANTalon	talon = talons_[_talon];
 
-		while(Timer.getFPGATimestamp() < start)
-		{
-			System.out.printf("%d,%f,%f,%f\n", ++count,
-				_talon.getPosition(),								// Encoder position.
-				_talon.getError() / RATE,							// Difference between set pos and current pos.
-				_talon.getSpeed()									// Speed in RPM.
-			);
+		talon.setPosition(0.0f);									// Reset encoder to zero.
 
-			if(Math.abs(Math.abs(_position) - Math.abs(_talon.getPosition())) < 0.002f)
-			{
-				break;
-			}
-		}
+		positions_[_talon] = _position;								// Set the current position.
+//		positions_[_talon] = _position + talon.getPosition();		// Adjust the current position.
+		
+		System.out.println(_talon + ":" + positions_[_talon]);
 
-		return _talon.getClosedLoopError();
+		talon.clearIAccum();
+		talon.changeControlMode(TalonControlMode.MotionMagic);		// Set the CAN Talon mode.
+		talon.set(positions_[_talon]);								// Number of wheel rotations.
+		
+		timeouts_[_talon] = Timer.getFPGATimestamp() + 10.0f;		// Grab the current time + 5s.
 	}
 
 	/**
