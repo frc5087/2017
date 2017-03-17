@@ -452,7 +452,7 @@ public class Robot extends SampleRobot
 
     			if(done() == false) break;
 
-    			motor_.move(2203.0f - 50.0f, 200.0f);
+    			motor_.move(2203.0f, 200.0f);
 
     			if(done() == false) break;
 
@@ -628,13 +628,13 @@ public class Robot extends SampleRobot
 
     	motor_.setup(true);
     	
-    	motor_.rotate(+90.0f, RPM / 2.0f);
-//    	motor_.move(+500.0f, 200.0f);
+//    	motor_.rotate(+90.0f, RPM / 2.0f);
+    	motor_.move(+1000.0f, 200.0f);
 
     	done();
 
-    	motor_.rotate(-90.0f, RPM / 2.0f);
-//    	motor_.move(-500.0f, 200.0f);
+//    	motor_.rotate(-90.0f, RPM / 2.0f);
+    	motor_.move(-1000.0f, 200.0f);
 
     	done();
     	
