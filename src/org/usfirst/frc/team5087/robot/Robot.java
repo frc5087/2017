@@ -524,7 +524,7 @@ public class Robot extends SampleRobot
     			
     			if(done() == false) break;
     			
-    			motor_.rotate(+59.0f * adj, RPM);
+    			motor_.rotate(-59.0f * adj, RPM);
 
     			if(done() == false) break;
 
