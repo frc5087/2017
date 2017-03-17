@@ -206,7 +206,7 @@ public class MotorControl
 				);
 		}
 		
-		if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.002f)
+		if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.003f)
 		{
 			ret = true;
 		}
