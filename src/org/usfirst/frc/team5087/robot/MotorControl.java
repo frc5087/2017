@@ -19,7 +19,7 @@ public class MotorControl
 	static	final boolean	SHOW_DRIVING	= false;
 
 	static final double	MAGIC_TIMEOUT	= 5.0f;
-	static final double	MAGIC_CURRENT	= 75.0f;
+	static final double	MAGIC_CURRENT	= 70.0f;
 	
     static	final int	LEFT_MASTER	= 0;
     static	final int	RIGHT_MASTER	= 1;
@@ -255,7 +255,7 @@ public class MotorControl
 	{
 		boolean ret = false;
 		
-		if(maxCurrent() > MAGIC_CURRENT)
+		if(maxCurrent() >= MAGIC_CURRENT)
 		{
 			ret = true;
 		}
