@@ -16,7 +16,11 @@ public class MotorControl
 {
 	static final boolean	SHOW_CONFIG	= false;
 	static	final boolean	SHOW_THEREYET	= false;
+	static	final boolean	SHOW_DRIVING	= false;
 
+	static final double	MAGIC_TIMEOUT	= 5.0f;
+	static final double	MAGIC_CURRENT	= 75.0f;
+	
     static	final int	LEFT_MASTER	= 0;
     static	final int	RIGHT_MASTER	= 1;
     static	final int	LEFT_SLAVE		= 2;
@@ -179,7 +183,7 @@ public class MotorControl
 			MotionMagic(RIGHT_MASTER, -distance);
 		}
 
-		System.out.println("Moving by " + mm + "mm (" + distance + " wheel rotations).");
+//		System.out.println("Moving by " + mm + "mm (" + distance + " wheel rotations).");
 	}
 
 	/**
@@ -193,36 +197,71 @@ public class MotorControl
 	@SuppressWarnings("unused")
 	boolean areWeThereYet(int _talon)
 	{
-		boolean	ret = false;
-		CANTalon	talon = talons_[_talon];
+		boolean	ret = stopMotion();
 		
-		if(SHOW_THEREYET == true)
+		if(ret == false)
 		{
-			System.out.printf("%d,%2.6f,%2.6f,%2.6f\n",
-					_talon,												// Talon index.
-					talon.getPosition(),								// Encoder position.
-					talon.getError() / RATE,							// Difference between set pos and current pos.
-					talon.getSpeed()									// Speed in RPM.
-				);
-		}
-		
-		if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.003f)
-		{
-			ret = true;
-		}
-		
-		if(Timer.getFPGATimestamp() > timeouts_[_talon])
-		{
-			ret = true;
+			CANTalon	talon = talons_[_talon];
 			
-			System.out.println("****************");
-			System.out.println("** TIMEOUT #" + _talon + " **");
-			System.out.println("****************");
+			if(SHOW_THEREYET == true)
+			{
+				System.out.printf("%d,%2.6f,%2.6f,%2.6f,%2.6f\n",
+						_talon,												// Talon index.
+						talon.getPosition(),								// Encoder position.
+						talon.getError() / RATE,							// Difference between set pos and current pos.
+						talon.getSpeed(),									// Speed in RPM.
+	    				talon.getOutputCurrent()
+					);
+			}
+
+			if(Math.abs(Math.abs(positions_[_talon]) - Math.abs(talon.getPosition())) < 0.003f)
+			{
+				ret = true;
+			}
+			
+			if(Timer.getFPGATimestamp() > timeouts_[_talon])
+			{
+				ret = true;
+				
+				System.out.println("****************");
+				System.out.println("** TIMEOUT #" + _talon + " **");
+				System.out.println("****************");
+			}
 		}
 
 		return ret;
 	}
 
+	/**
+	 * Return the max current draw from the Talons.
+	 * @return
+	 */
+	
+	double maxCurrent()
+	{
+		double left  = left().getOutputCurrent(); 
+		double right = right().getOutputCurrent();
+		
+		return Math.max(left, right);
+	}
+
+	/**
+	 * See if the current draw is too high.
+	 * 
+	 * @return
+	 */
+	
+	boolean stopMotion()
+	{
+		boolean ret = false;
+		
+		if(maxCurrent() > MAGIC_CURRENT)
+		{
+			ret = true;
+		}
+		
+		return ret;
+	}
 	/**
 	 * 
 	 */
@@ -247,6 +286,7 @@ public class MotorControl
 	 * @param	_squared	If set, decreases the sensitivity at low speeds
 	 */
 
+	@SuppressWarnings("unused")
 	public void arcadeDrive(double _move, double _rotate, boolean _squared)
 	{
 	    double left;
@@ -311,8 +351,11 @@ public class MotorControl
 	    
 	    right().changeControlMode(TalonControlMode.PercentVbus);
 	    right().set(right);
-	    
-	    System.out.println("L:" + left().getSpeed() + " R:" + right().getSpeed() + " ROT:" + _rotate);
+
+	    if(SHOW_DRIVING == true)
+		{
+	    	System.out.println("L:" + left().getSpeed() + " R:" + right().getSpeed() + " ROT:" + _rotate);
+		}
 	}
 
 	/**
@@ -461,13 +504,11 @@ public class MotorControl
 		positions_[_talon] = _position;								// Set the current position.
 //		positions_[_talon] = _position + talon.getPosition();		// Adjust the current position.
 		
-		System.out.println(_talon + ":" + positions_[_talon]);
-
 		talon.clearIAccum();
 		talon.changeControlMode(TalonControlMode.MotionMagic);		// Set the CAN Talon mode.
 		talon.set(positions_[_talon]);								// Number of wheel rotations.
 		
-		timeouts_[_talon] = Timer.getFPGATimestamp() + 10.0f;		// Grab the current time + 5s.
+		timeouts_[_talon] = Timer.getFPGATimestamp() + MAGIC_TIMEOUT;
 	}
 
 	/**
