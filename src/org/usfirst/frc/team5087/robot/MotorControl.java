@@ -312,7 +312,7 @@ public class MotorControl
 	    right().changeControlMode(TalonControlMode.PercentVbus);
 	    right().set(right);
 	    
-	    System.out.println("L:" + left().getSpeed() + " R:" + right().getSpeed());
+	    System.out.println("L:" + left().getSpeed() + " R:" + right().getSpeed() + " ROT:" + _rotate);
 	}
 
 	/**
