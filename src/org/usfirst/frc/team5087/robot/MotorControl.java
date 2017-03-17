@@ -25,6 +25,11 @@ public class MotorControl
     static	final int	RIGHT_MASTER	= 1;
     static	final int	LEFT_SLAVE		= 2;
     static	final int	RIGHT_SLAVE	= 3;
+    
+    int		averageCount_;
+    double	averageCurrent_;
+    double minCurrent_;
+    double maxCurrent_;
 
     double[]	positions_	= new double[2];
     double[]	timeouts_	= new double[2];
@@ -145,6 +150,11 @@ public class MotorControl
 		configure(LEFT_MASTER,  0, _rpm);
 		configure(RIGHT_MASTER, 0, _rpm);
 
+		averageCount_	= 0;
+		averageCurrent_ = 0.0f;
+		minCurrent_		= 100.0f;
+		maxCurrent_		= 0.0f;
+		
 		double	distance = _mm / Dimensions.wheelCircumferenceMM;
 
 		MotionMagic(LEFT_MASTER,  distance);
@@ -163,7 +173,12 @@ public class MotorControl
 	{
 		configure(LEFT_MASTER,  0, _rpm);
 		configure(RIGHT_MASTER, 0, _rpm);
-		
+
+		averageCount_	= 0;
+		averageCurrent_ = 0.0f;
+		minCurrent_		= 100.0f;
+		maxCurrent_		= 0.0f;
+
 		double	curcumference = Dimensions.wheelGapMM * Math.PI;
 		
 		double angle = Math.abs(_angle) / 360.0f;
@@ -210,7 +225,7 @@ public class MotorControl
 						talon.getPosition(),								// Encoder position.
 						talon.getError() / RATE,							// Difference between set pos and current pos.
 						talon.getSpeed(),									// Speed in RPM.
-	    				talon.getOutputCurrent()
+	    				talon.getOutputCurrent()							// Motor current draw.
 					);
 			}
 
@@ -229,6 +244,13 @@ public class MotorControl
 			}
 		}
 
+		if(ret == true)
+		{
+			averageCurrent_ /= averageCount_;
+			
+			System.out.println("A:" + averageCurrent_ + " min:" + minCurrent_ + " max:" + maxCurrent_);
+		}
+		
 		return ret;
 	}
 
@@ -242,7 +264,16 @@ public class MotorControl
 		double left  = left().getOutputCurrent(); 
 		double right = right().getOutputCurrent();
 		
-		return Math.max(left, right);
+		double max = Math.max(left, right);
+
+		averageCount_++;
+		
+		averageCurrent_ += max;
+		
+		minCurrent_ = Math.min(minCurrent_,  max);
+		maxCurrent_ = Math.max(maxCurrent_,  max);
+		
+		return max;
 	}
 
 	/**
