@@ -6,7 +6,7 @@ public class InstalledHardware
     
     static	final	boolean	DRIVE				= true;
     static	final	boolean	GYROSCOPE			= false;
-    static	final	boolean	SPOKE_SENSOR		= true;
+    static	final	boolean	SPOKE_SENSOR		= false;
     static	final	boolean	JOYSTICK			= true;
     static	final	boolean	FRONT_CAMERA		= true;
     static	final	boolean	REAR_CAMERA		= true;
