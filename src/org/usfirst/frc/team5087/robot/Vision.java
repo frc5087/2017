@@ -37,6 +37,9 @@ public class Vision
 	Robot	robot_;
 	
 	Thread	visionProcess_;
+	
+	double	leftright_;
+	double	size_;
 
 	/*
 	 * Constructor.
@@ -50,7 +53,10 @@ public class Vision
 		image_ 	= new Mat();
 
 		temp_ 	= new Mat();
-		
+
+		size_ = -1.0f;
+		leftright_ = -1.0f;
+
 		// Allocate the storage for the generated contours.
 
 		contours_ = new ArrayList<MatOfPoint>();
@@ -136,7 +142,39 @@ public class Vision
 										 2);
 				}
 			}
+			
+			if(rectangles_.size() == 2)
+			{
+				size_ = Math.max(rectangles_.get(0).size.width, rectangles_.get(1).size.width);
+				
+				leftright_ = ((rectangles_.get(0).center.x + rectangles_.get(1).center.x) / 2.0f) - 160.0f;
+			}
+			else
+			{
+				size_ = -1.0f;
+				leftright_ = -1.0f;
+			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	
+	double size()
+	{
+		return size_;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	
+	double leftright()
+	{
+		return leftright_;
 	}
 	
 	/*
