@@ -320,7 +320,7 @@ public class Robot extends SampleRobot
             	}
 
         		if((InstalledHardware.FRONT_CAMERA == true)
-        		|| (InstalledHardware.FRONT_CAMERA == true))
+        		|| (InstalledHardware.REAR_CAMERA == true))
         		{
             		vision_.show(original);
             		
@@ -444,7 +444,7 @@ public class Robot extends SampleRobot
     	{
     		case '1' :
     		{
-    			motor_.move(2614.0f - 393.0f, RPM);
+    			motor_.move(2164.0f - 393.0f, RPM);
     			
     			if(done() == false) break;
     			
@@ -452,13 +452,15 @@ public class Robot extends SampleRobot
 
     			if(done() == false) break;
 
-    			motor_.move(2203.0f - 393.0f, RPM);
+    			motor_.move(2203.0f - 393.0f, 200.0f);
 
     			if(done() == false) break;
 
         		drop_.set(true);
 
-    			motor_.move(-500.0f, RPM / 2.0f);
+        		Timer.delay(0.5f);
+
+    			motor_.move(-500.0f, 100.0f);
 
     			if(done() == false) break;
 
@@ -481,7 +483,7 @@ public class Robot extends SampleRobot
     		
     		case '2' :
     		{
-    			motor_.move(2840.0f - 393.0f - 393.0f, 250.0f);
+    			motor_.move(2840.0f - 393.0f - 393.0f, 200.0f);
     			
     			if(done() == false) break;
     			
@@ -489,7 +491,7 @@ public class Robot extends SampleRobot
         		
         		Timer.delay(0.5f);
 
-    			motor_.move(-2840.0f - 393.0f - 393.0f - 400.0f, 125.0f);
+    			motor_.move(-(2840.0f - 393.0f - 393.0f - 400.0f), 100.0f);
 
     			if(done() == false) break;
 
@@ -524,13 +526,15 @@ public class Robot extends SampleRobot
 
     			if(done() == false) break;
 
-    			motor_.move(2238.0f - 393.0f, RPM);
+    			motor_.move(2238.0f - 393.0f, 200.0f);
 
     			if(done() == false) break;
 
         		drop_.set(true);
 
-    			motor_.move(-500.0f, RPM / 2.0f);
+        		Timer.delay(0.5f);
+
+    			motor_.move(-500.0f, 100.0f);
 
     			if(done() == false) break;
 
@@ -589,6 +593,8 @@ public class Robot extends SampleRobot
         	moveRobot();
         	
         	slowMove();
+
+        	autoDrive();
         	
         	dropGear();
         	
@@ -715,6 +721,43 @@ public class Robot extends SampleRobot
     	}
     }
 
+    /**
+     * Auto drive to drop the gear off if we can.
+     */
+    
+    private void autoDrive()
+    {
+    	if((InstalledHardware.JOYSTICK == true)
+    	&& (InstalledHardware.DRIVE == true)
+		&& (InstalledHardware.FRONT_CAMERA == true))
+    	{
+            if(joystick_.getRawButton(Controller.BUTTON_Y) == true)
+            {
+            	double leftright = vision_.leftright();
+            	double distance  = vision_.size();
+            	
+            	if((leftright != -1.0f)
+            	&& (distance != -1.0f))
+            	{
+                	distance  = 60.0f - distance;
+
+                	distance  = distance  / 60.0f;	// gives 0->1
+                	leftright = leftright / 60.0f;	// gives 0->1
+                	
+                	distance  = distance  * 0.75f;		// 75%
+                	leftright = leftright * 0.20f;		// 20%
+                	
+                	if(distance >= 0.0f)
+                	{
+                		motor_.arcadeDrive(distance, leftright, true);
+                	
+                		System.out.println("LR:" + leftright + " D:" + distance);
+                	}
+            	}
+            }
+    	}
+    }
+    
 	/*
 	 * If the <A> button is pressed and held, open the gear/cog holder, otherwise
 	 * close the gear/cog holder.
