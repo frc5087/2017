@@ -444,7 +444,7 @@ public class Robot extends SampleRobot
     	{
     		case '1' :
     		{
-    			motor_.move(2164.0f - 393.0f - 393.0f - 150.0f, RPM);
+    			motor_.move(2164.0f - 393.0f - 150.0f, RPM);
     			
     			if(done() == false) break;
     			
